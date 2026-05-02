@@ -412,7 +412,7 @@ function TrackFork() {
 }
 
 // ─── プレイ画面 ──────────────────────────────────────────
-export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, onHandRaised, onVotesChange, timeoutLabel }) {
+export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, onHandRaised, onVotesChange, timeoutLabel, hintText }) {
   const votesRef      = useRef({ left: 0, right: 0 });
   const tiltRef       = useRef(0);
   const videoPanelRef = useRef(null);
@@ -533,7 +533,7 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
       </div>
 
       <div ref={videoPanelRef} style={{ ...styles.videoPanel, visibility: viewMode === 'top' ? 'hidden' : 'visible' }}>
-        <PoseDetector onVotes={handleVotes} onHandRaised={onHandRaised} />
+        <PoseDetector onVotes={handleVotes} onHandRaised={onHandRaised} hintText={hintText} />
       </div>
 
       {timeoutLabel && (

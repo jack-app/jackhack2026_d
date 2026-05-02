@@ -73,8 +73,9 @@ function App() {
     : NARRATIONS[scene];
 
   const useHint = () => {
-    // TODO: batteryRef.current.get() >= 10 のとき batteryRef.current.decrease(10) を呼ぶ
-    // TODO: setIsHintVisible(true) でヒントを表示する
+    if (isHintVisible) return;
+    if (battery >= 10) batteryRef.current?.decrease(10);
+    setIsHintVisible(true);
   };
 
   const selectDifficulty = (level) => {

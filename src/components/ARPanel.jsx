@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ARScene from './AR';
 
-export default function ARPanel({ currentData, onAnswer, pendingBranch, onBranchComplete, onUseHint, timeLeft }) {
+export default function ARPanel({ currentData, onAnswer, pendingBranch, onBranchComplete, onUseHint, timeLeft, hintText }) {
   const navigate = useNavigate();
   const latestVotesRef = useRef({ left: 0, right: 0 });
   const [timeoutLabel, setTimeoutLabel] = useState(null);
@@ -33,6 +33,7 @@ export default function ARPanel({ currentData, onAnswer, pendingBranch, onBranch
       onHandRaised={onUseHint}
       onVotesChange={handleVotesChange}
       timeoutLabel={timeoutLabel}
+      hintText={hintText}
     />
   );
 }

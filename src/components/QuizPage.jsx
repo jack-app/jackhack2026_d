@@ -55,6 +55,7 @@ export default function QuizPage({
             onBranchComplete={onBranchComplete}
             onUseHint={onUseHint}
             timeLeft={timeLeft}
+            hintText={currentData.hint}
           />
         </div>
 
