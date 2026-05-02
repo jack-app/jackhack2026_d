@@ -39,7 +39,9 @@ export default function QuizBoard({
 
         <div style={{ flex: 1 }}>
           <p style={{ margin: 0 , fontSize: "30px",color:'#E8F4F0'}}>{currentData.text}</p>
-          {isHintVisible && <p style={{ margin: 0,color:'#E8F4F0' }}>{currentData.hint}</p>}
+          {/* {isHintVisible && <p style={{ margin: 0,color:'#E8F4F0' }}>{currentData.hint}</p>} */}
+          <p style={{margin:0, color:'#E8F4F0', border:"2px dashed #5DCAA5", padding:'6px', display:'inline-block',
+            borderRadius:'15px' }}>ヒントは手を挙げたら表示されます。</p>
         </div>
 
         <span
@@ -53,34 +55,32 @@ export default function QuizBoard({
     fontWeight: "bold",
     color:'#E8F4F0'}}>{timeLeft}</span>
       </div>
-
-      <div style={{ display: 'flex', gap: 20,justifyContent:'space-between' }}>
-        <button
+      {/* <div style={{color:'#E8F4F0', textAlign:'center'}}>ヒント</div> */}
+      <div style={{ 
+        display: 'flex',
+        gap: 50,
+        justifyContent:'space-between',
+        padding:'0 100px',
+        boxSizing:'border-box' }}>
+        <div
           style={{ flex: 1 ,border: "2px solid #5DCAA5",
-                padding: "10px",
-                background: "transparent"}}
+                padding: "20px",
+                background: "transparent",borderRadius: "10px"}}
           onClick={() => onAnswer(currentData.choices[0], navigate)}
           disabled={!!pendingBranch}
         >
-          ← {currentData.choices[0]}
-        </button>
+          <span style={{color:'#E8F4F0',paddingLeft:'40%'}}>← {currentData.choices[0]}</span>
+        </div>
 
-        {/* <button
-          onClick={onUseHint}
-          disabled={battery < 10 || !!pendingBranch}
-        >
-          ヒント (−10)
-        </button> */}
-
-        <button
+        <div
           style={{ flex: 1, border: "2px solid #5DCAA5",
-      padding: "10px",
-      background: "transparent" }}
+      padding: "20px",
+      background: "transparent" ,borderRadius: "10px"}}
           onClick={() => onAnswer(currentData.choices[1], navigate)}
           disabled={!!pendingBranch}
         >
-          → {currentData.choices[1]}
-        </button>
+         <span style={{color:'#E8F4F0',paddingLeft:'40%'}}>→ {currentData.choices[1]}</span>
+        </div>
       </div>
 
     </div>

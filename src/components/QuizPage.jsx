@@ -25,7 +25,7 @@ export default function QuizPage({
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
 
       {/* 上段：問題エリア */}
-      <div style={{ flexShrink: 0 ,backgroundColor:'#1A3040'}}>
+      <div style={{ flexShrink: 0 ,backgroundColor:'#1A3040', marginBottom:'10px'}}>
         <QuizBoard
           questionIndex={questionIndex}
           totalQuestions={totalQuestions}
