@@ -33,11 +33,15 @@ const NARRATIONS = {
 };
 
 function App() {
+  // battery は BatteryMeter が所有する state の読み取り用シャドウ
+  // 書き込みは batteryRef.current.increase / decrease / reset を使う
   const [battery, setBattery] = useState(100);
+  const batteryRef = useRef(null);
+
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [difficulty, setDifficulty] = useState('easy'); // 'easy' or 'hard'
-  const [status, setStatus] = useState('playing'); // 'success' or 'failed'
-  const [scene, setScene] = useState('start'); // 'start' | 'quiz' | 'finish'
+  const [difficulty, setDifficulty] = useState('easy');
+  const [status, setStatus] = useState('playing');
+  const [scene, setScene] = useState('start');
   const [isHintVisible, setIsHintVisible] = useState(false);
   const [isDifficultySelected, setIsDifficultySelected] = useState(false);
   const [showSelector, setShowSelector] = useState(false);
@@ -46,34 +50,31 @@ function App() {
 
   const filteredQuestions = QUESTIONS.filter(q => q.difficulty === difficulty);
   const selectionPoints = [0, 3, QUESTIONS.length - 1];
-  
+
   const handleStart = () => {
     setScene('quiz');
     if (selectionPoints.includes(0)) {
       setShowSelector(true);
       setIsDifficultySelected(false);
     }
-  }
-  // --- ゲームのリセット ---
+  };
+
   const resetGame = () => {
-    setBattery(100);
+    batteryRef.current?.reset();
     setCurrentIndex(0);
     setIsHintVisible(false);
     setScene('start');
     setShowSelector(false);
     setIsDifficultySelected(false);
   };
-  //魔女にどの文章を喋らすかのロジック
-  const currentNarration = scene === 'finish'
-  ? (status === 'success' ? NARRATIONS.finish.success : NARRATIONS.finish.failed)
-  : NARRATIONS[scene];
 
-  // --- 正誤判定ロジック（難易度による分岐） ---
+  const currentNarration = scene === 'finish'
+    ? (status === 'success' ? NARRATIONS.finish.success : NARRATIONS.finish.failed)
+    : NARRATIONS[scene];
+
   const useHint = () => {
-  if (battery >= 10) {
-    setBattery(prev => Math.max(0, prev - 10));
-    setIsHintVisible(true);
-  }
+    // TODO: batteryRef.current.get() >= 10 のとき batteryRef.current.decrease(10) を呼ぶ
+    // TODO: setIsHintVisible(true) でヒントを表示する
   };
 
   const selectDifficulty = (level) => {
@@ -83,7 +84,7 @@ function App() {
   };
 
   const handleBranchComplete = () => {
-    setBattery(prev => Math.max(0, prev - 5)); // トロッコ1周分のエネルギー消費
+    batteryRef.current?.decrease(5); // トロッコ1周分のエネルギー消費
     const pending = pendingNavigateRef.current;
     if (pending) {
       pending.fn(pending.navigate);
@@ -93,21 +94,15 @@ function App() {
   };
 
   const handleAnswer = (choice, navigate) => {
-    // choices[0] = 左分岐、choices[1] = 右分岐
     const branchDir = choice === filteredQuestions[currentIndex].choices[0] ? 'left' : 'right';
     const isCorrect = branchDir === filteredQuestions[currentIndex].currentDirection;
     setPendingBranch(branchDir);
 
-    // アニメーション完了後に実行する処理を ref に保存
     pendingNavigateRef.current = {
       navigate,
       fn: (nav) => {
         if (isCorrect) {
-          if (difficulty === 'hard') {
-            setBattery(prev => Math.min(100, prev + 20));
-          } else {
-            setBattery(prev => Math.min(100, prev + 5));
-          }
+          batteryRef.current?.increase(difficulty === 'hard' ? 20 : 5);
           if (currentIndex < filteredQuestions.length - 1) {
             const nextIndex = currentIndex + 1;
             setCurrentIndex(prev => prev + 1);
@@ -138,19 +133,19 @@ function App() {
             <Start handleStart={handleStart}/>
             <WhitchNarrator lines={currentNarration} />
           </>
-           
         } />
         <Route path="/quiz" element={
           <>
-            {/* 難易度が未選択なら選択ボタンを表示、選択済みならクイズを表示 */}
-            { !isDifficultySelected ? (
+            {!isDifficultySelected ? (
               <Selector
-              onSelect = {selectDifficulty}
-              currentDifficulty={difficulty}
+                onSelect={selectDifficulty}
+                currentDifficulty={difficulty}
               />
             ) : (
               <QuizPage
                 battery={battery}
+                batteryRef={batteryRef}
+                onBatteryChange={setBattery}
                 currentData={filteredQuestions[currentIndex]}
                 onAnswer={handleAnswer}
                 onUseHint={useHint}
@@ -163,21 +158,19 @@ function App() {
               />
             )}
           </>
-
         } />
         <Route path="/finish" element={
           <>
-            <Finish 
-            status={status}   
-            onRetry={resetGame} 
-            score={currentIndex + 1} 
-            battery={battery}
-            currentIndex={currentIndex + 1}
-            totalQuestions={QUESTIONS.length}
+            <Finish
+              status={status}
+              onRetry={resetGame}
+              score={currentIndex + 1}
+              battery={battery}
+              currentIndex={currentIndex + 1}
+              totalQuestions={QUESTIONS.length}
             />
             <WhitchNarrator lines={currentNarration} />
           </>
-          
         } />
       </Routes>
     </Router>

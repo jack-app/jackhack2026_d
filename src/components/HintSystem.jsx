@@ -1,5 +1,5 @@
 export default function HintSystem({ battery, onUseHint, isHintVisible, hintText }) {
-  // 初心者の仕事：ボタンをカッコよくし、ヒントが出た時のアニメーションを作る
+  // TODO：isHintVisibleがtrueになった時のアニメーションを作る(Buttonを無しにする)
   return (
     <div style={{ margin: "20px 0" }}>
       <button onClick={onUseHint} disabled={battery < 10}>
