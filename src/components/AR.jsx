@@ -15,11 +15,11 @@ const RETURN_STRAIGHT_DURATION = 2500;
 
 // ─── 完璧な「2つくっついた長方形」を描くための寸法パラメータ ───────────
 const PATH_PARAMS = {
-  R: 12,              // 角の丸み（半径）
-  W: 42,              // ループの横幅（中心から一番外側のレールまで）
-  Z_TOP: -100,        // 長方形の一番上のZ座標
+  R: 6,               // 角の丸み（半径）
+  W: 21,              // ループの横幅（中心から一番外側のレールまで）
+  Z_TOP: -50,         // 長方形の一番上のZ座標
   Z_BOTTOM: 0,        // 長方形の一番下のZ座標
-  INITIAL_Z: -82      // トロッコの初期位置（分岐 Z=-88 の少し手前）
+  INITIAL_Z: -41      // トロッコの初期位置（分岐 Z=-44 の少し手前）
 };
 
 // ─── トロッコのアニメーション用軌道計算 ────────────────────────
@@ -159,9 +159,9 @@ function CameraController({ viewMode, cartPosRef }) {
 
       camera.fov = 50;
     } else {
-      camera.position.set(cx, 180.0, cz + 20);
+      camera.position.set(cx, 90.0, cz + 10);
       camera.up.set(0, 0, -1);
-      camera.lookAt(cx, TRACK_Y, cz + 5);
+      camera.lookAt(cx, TRACK_Y, cz + 2.5);
       camera.fov = 45;
     }
 
@@ -406,7 +406,7 @@ function TrackFork() {
     <group>
       <TrackSegment direction="left" segments={250} yOffset={0.001} />
       <TrackSegment direction="right" segments={250} yOffset={0.002} />
-      <SwitchLever position={[8.5, TRACK_Y - 0.68, PATH_PARAMS.Z_TOP + PATH_PARAMS.R + 2]} />
+      <SwitchLever position={[4.25, TRACK_Y - 0.68, PATH_PARAMS.Z_TOP + PATH_PARAMS.R + 1]} />
     </group>
   );
 }
