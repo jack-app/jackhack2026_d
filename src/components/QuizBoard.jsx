@@ -26,34 +26,56 @@ export default function QuizBoard({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 12 }}>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span>{questionIndex}/{totalQuestions}</span>
+        <span
+        style={{display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "48px",
+    height: "48px",
+    border: "2px solid #5DCAA5",
+    borderRadius: "50%",
+    fontWeight: "bold",
+    color:'#E8F4F0'}}>{questionIndex}/{totalQuestions}</span>
 
         <div style={{ flex: 1 }}>
-          <p style={{ margin: 0 }}>{currentData.text}</p>
-          {isHintVisible && <p style={{ margin: 0 }}>{currentData.hint}</p>}
+          <p style={{ margin: 0 , fontSize: "30px",color:'#E8F4F0'}}>{currentData.text}</p>
+          {isHintVisible && <p style={{ margin: 0,color:'#E8F4F0' }}>{currentData.hint}</p>}
         </div>
 
-        <span>{timeLeft}</span>
+        <span
+        style={{display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "48px",
+    height: "48px",
+    border: "2px solid red",
+    borderRadius: "50%",
+    fontWeight: "bold",
+    color:'#E8F4F0'}}>{timeLeft}</span>
       </div>
 
-      <div style={{ display: 'flex', gap: 10 }}>
+      <div style={{ display: 'flex', gap: 20,justifyContent:'space-between' }}>
         <button
-          style={{ flex: 1 }}
+          style={{ flex: 1 ,border: "2px solid #5DCAA5",
+                padding: "10px",
+                background: "transparent"}}
           onClick={() => onAnswer(currentData.choices[0], navigate)}
           disabled={!!pendingBranch}
         >
           ← {currentData.choices[0]}
         </button>
 
-        <button
+        {/* <button
           onClick={onUseHint}
           disabled={battery < 10 || !!pendingBranch}
         >
           ヒント (−10)
-        </button>
+        </button> */}
 
         <button
-          style={{ flex: 1 }}
+          style={{ flex: 1, border: "2px solid #5DCAA5",
+      padding: "10px",
+      background: "transparent" }}
           onClick={() => onAnswer(currentData.choices[1], navigate)}
           disabled={!!pendingBranch}
         >
