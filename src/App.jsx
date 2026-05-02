@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate} from 'react-router-dom';
 import Start from './components/Start';
 import QuizPage from './components/QuizPage';
@@ -7,8 +7,8 @@ import WhitchNarrator from './components/WhitchNarrator';
 import Selector from './components/Selector';
 
 const QUESTIONS = [
-  { id: 1, text: "電気抵抗の単位は？", choices: ["Ω", "V"], answer: "Ω", hint: "ギリシャ文字です", difficulty: "easy" },
-  { id: 2, text: "Reactで状態を管理するのは？", choices: ["useState", "useEffect"], answer: "useState", hint: "名前の通りです", difficulty: "hard" },
+  { id: 1, text: "電気抵抗の単位は？", choices: ["Ω", "V"], currentDirection: "left", hint: "ギリシャ文字です", difficulty: "easy" },
+  { id: 2, text: "Reactで状態を管理するのは？", choices: ["useState", "useEffect"], currentDirection: "left", hint: "名前の通りです", difficulty: "hard" },
 ];
 
 const NARRATIONS = {
@@ -41,6 +41,8 @@ function App() {
   const [isHintVisible, setIsHintVisible] = useState(false);
   const [isDifficultySelected, setIsDifficultySelected] = useState(false);
   const [showSelector, setShowSelector] = useState(false);
+  const [pendingBranch, setPendingBranch] = useState(null);
+  const pendingNavigateRef = useRef(null);
 
   const filteredQuestions = QUESTIONS.filter(q => q.difficulty === difficulty);
   const selectionPoints = [0, 3, QUESTIONS.length - 1];
@@ -80,53 +82,52 @@ function App() {
     setShowSelector(false);
   };
 
+  const handleBranchComplete = () => {
+    setBattery(prev => Math.max(0, prev - 5)); // トロッコ1周分のエネルギー消費
+    const pending = pendingNavigateRef.current;
+    if (pending) {
+      pending.fn(pending.navigate);
+      pendingNavigateRef.current = null;
+    }
+    setPendingBranch(null);
+  };
+
   const handleAnswer = (choice, navigate) => {
-    const isCorrect = choice === filteredQuestions[currentIndex].answer;
-    
-    if (isCorrect) {
-      if (difficulty === 'hard') {
-        setBattery(prev => Math.min(100, prev + 20)); // Hardなら回復
-      } else {
-        setBattery(prev => Math.min(100, prev + 5));  // Easyは微増
-      }
-      // 次の問題へ進むか、クリア判定
-      if (currentIndex < filteredQuestions.length - 1) {
-        const nextIndex = currentIndex + 1;
-        setCurrentIndex(prev => prev + 1);
-        setIsHintVisible(false); // 次の問題ではヒントを隠す
+    // choices[0] = 左分岐、choices[1] = 右分岐
+    const branchDir = choice === filteredQuestions[currentIndex].choices[0] ? 'left' : 'right';
+    const isCorrect = branchDir === filteredQuestions[currentIndex].currentDirection;
+    setPendingBranch(branchDir);
 
-        if (selectionPoints.includes(nextIndex)){
-          setShowSelector(true);
-          setIsDifficultySelected(false);
+    // アニメーション完了後に実行する処理を ref に保存
+    pendingNavigateRef.current = {
+      navigate,
+      fn: (nav) => {
+        if (isCorrect) {
+          if (difficulty === 'hard') {
+            setBattery(prev => Math.min(100, prev + 20));
+          } else {
+            setBattery(prev => Math.min(100, prev + 5));
+          }
+          if (currentIndex < filteredQuestions.length - 1) {
+            const nextIndex = currentIndex + 1;
+            setCurrentIndex(prev => prev + 1);
+            setIsHintVisible(false);
+            if (selectionPoints.includes(nextIndex)) {
+              setShowSelector(true);
+              setIsDifficultySelected(false);
+            }
+          } else {
+            setStatus('success');
+            setScene('finish');
+            nav('/finish');
+          }
+        } else {
+          setStatus('failed');
+          setScene('finish');
+          nav('/finish');
         }
-      } else {
-        setStatus('success');
-        setScene('finish');
-        navigate('/finish');
-      }
-    } else {
-      // 不正解時は即終了（共通ルール）
-      setStatus('failed');
-      setScene('finish');
-      navigate('/finish');
+      },
     };
-
-    // 次へ進む判定
-    // if (currentIndex < QUESTIONS.length - 1) {
-    //   setCurrentIndex(prev => prev + 1);
-    // } else {
-    //   if (isCorrect === false) {
-    //     setStatus('failed');
-    //     navigate('/finish');
-    //     setScene('finish');
-    //     return;
-    //   }
-    //   else {
-    //   setStatus('success');
-    //   navigate('/finish');
-    //   setScene('finish');
-    //   }
-    // }
   };
 
   return (
@@ -148,16 +149,19 @@ function App() {
               currentDifficulty={difficulty}
               />
             ) : (
-              <QuizPage 
-                battery={battery} 
-                currentData={filteredQuestions[currentIndex]} 
+              <QuizPage
+                battery={battery}
+                currentData={filteredQuestions[currentIndex]}
                 onAnswer={handleAnswer}
-                setBattery={setBattery}
-                onUseHint={useHint} 
+                onUseHint={useHint}
                 isHintVisible={isHintVisible}
+                pendingBranch={pendingBranch}
+                onBranchComplete={handleBranchComplete}
+                questionIndex={currentIndex + 1}
+                totalQuestions={filteredQuestions.length}
+                narrationLines={currentNarration}
               />
             )}
-            <WhitchNarrator lines={currentNarration} />
           </>
 
         } />
