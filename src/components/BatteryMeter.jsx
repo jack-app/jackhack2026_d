@@ -31,13 +31,15 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
   const color = '#22c55e';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, containerType:"inline-size", width: '100%', height: '100%', backgroundColor:"#0E1A20"}}>
-      <p>バッテリー</p>
-      <div className="whole_battery" style={{ position: 'relative', display: 'flex', width: '40%', aspectRatio:"1/3", height:"auto", border: '4cqw solid #5DCAA5', borderRadius: '10cqw', alignItems: 'flex-end', boxSizing: 'border-box'}}>
-        <div className="battery_tip" style={{ position: 'absolute', top: '-8%', left: '50%', transform: 'translateX(-50%)', width: '40%', height: '8%', backgroundColor: '#5DCAA5', borderRadius: '20% 20% 0 0' }}/>
-        <div className="inner_battery" style={{ width: '100%', height: `${battery}%`, backgroundColor: '#ddd',opacity:"100%" , borderRadius: '6cqw', transition: 'height 0.3s ease, background-color 0.3s ease' }} />
-      </div> 
-      <p style={{  color:"#fff", fontFamily:"" }}>{battery}%</p>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, containerType:"inline-size", width: '100%', height: '100%', backgroundColor:"#0E1A20", zIndex:'-2'}}>
+      <p style={{ color:"#5DCAA5", fontFamily:"Noto Sans JP", fontWeight:"bold", fontSize:"1.3em" }}>Battery</p>
+      <div className="battery_container" style={{ position: 'relative', width: '40%', aspectRatio: "1/3" }}>
+        <div className="battery_tip" style={{ position: 'absolute', top: '-5%', left: '50%', transform: 'translateX(-50%)', width: '45%', height: '5%', backgroundColor: '#5DCAA5', borderRadius: '3cqw 3cqw 0 0' }}/>
+        <div className="whole_battery" style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', width: '100%', height:"100%", border: '4cqw solid #5DCAA5', borderRadius: '10cqw', boxSizing: 'border-box', zIndex:'auto', overflow:'hidden'}}>
+          <div className="inner_battery" style={{ position:'absolute', width: '100%', height: `${battery}%`, backgroundColor: '#ddd',opacity:"100%" , borderRadius: '0 0 6cqw 6cqw', transition: 'height 0.3s ease, background-color 0.3s ease', zIndex: '-1' }} />
+        </div>
+      </div>
+      <p style={{ color:"#5DCAA5", fontFamily:"Noto Sans JP", fontWeight:"bold", fontSize:"1.4rem" }}>{battery}%</p>
     </div>
   );
 });
