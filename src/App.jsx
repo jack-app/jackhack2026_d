@@ -74,6 +74,7 @@ function App() {
 
   const useHint = () => {
     // TODO: batteryRef.current.get() >= 10 のとき batteryRef.current.decrease(10) を呼ぶ
+    batteryRef.current.decrease(10);
     // TODO: setIsHintVisible(true) でヒントを表示する
   };
 
