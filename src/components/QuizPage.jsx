@@ -22,7 +22,7 @@ export default function QuizPage({
   const [timeLeft, setTimeLeft] = useState(10);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', backgroundColor: '#0E1A20' }}>
 
       {/* 上段：問題エリア */}
       <div style={{ flexShrink: 0 }}>
