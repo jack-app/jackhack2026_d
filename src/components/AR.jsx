@@ -1,7 +1,8 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import PoseDetector from './PoseDetector';
+import rengaTexture from '../assets/texture/renga.jpg';
 
 const lerp = (a, b, t) => a + (b - a) * t;
 
@@ -83,7 +84,6 @@ function getCartTangent(dir, phase, t) {
   return { x: dx / len, z: dz / len };
 }
 
-// ─── 外周レールの描画用計算 ──────────────────────────────
 function getOuterLoopPoint(dir, t) {
   const { R, W, Z_TOP, Z_BOTTOM } = PATH_PARAMS;
   const sign = dir === 'left' ? -1 : 1;
@@ -119,7 +119,6 @@ function getOuterLoopPoint(dir, t) {
   }
 }
 
-// ─── トロッコを傾ける Three.js グループ ────────────────────
 function TiltGroup({ tiltRef, cartPosRef, children }) {
   const groupRef = useRef();
   useFrame(() => {
@@ -133,7 +132,6 @@ function TiltGroup({ tiltRef, cartPosRef, children }) {
   return <group ref={groupRef}>{children}</group>;
 }
 
-// ─── CameraController: トロッコに完全リジッド固定 ────────────────────────
 function CameraController({ viewMode, cartPosRef }) {
   const { camera } = useThree();
 
@@ -143,20 +141,15 @@ function CameraController({ viewMode, cartPosRef }) {
     const rotY = cartPosRef.current.rotY ?? 0;
 
     if (viewMode === 'normal') {
-      // トロッコの進行方向に合わせてオフセットを回転
       const euler = new THREE.Euler(0, rotY, 0, 'YXZ');
-
       const posOffset = new THREE.Vector3(0, 3.5, 9.5);
       posOffset.applyEuler(euler);
-
       const lookOffset = new THREE.Vector3(0, 0.5, -5.0);
       lookOffset.applyEuler(euler);
 
-      // 位置・視線・上方向すべてスナップ（lag なし）
       camera.position.set(cx + posOffset.x, TRACK_Y + posOffset.y, cz + posOffset.z);
       camera.up.set(0, 1, 0);
       camera.lookAt(cx + lookOffset.x, TRACK_Y + lookOffset.y, cz + lookOffset.z);
-
       camera.fov = 50;
     } else {
       camera.position.set(cx, 130.0, cz + 30);
@@ -164,13 +157,11 @@ function CameraController({ viewMode, cartPosRef }) {
       camera.lookAt(cx, TRACK_Y, cz + 30);
       camera.fov = 45;
     }
-
     camera.updateProjectionMatrix();
   });
   return null;
 }
 
-// ─── 線路（突き抜けないように綺麗にトリミングされた中央レール） ───────────
 function WideTrack() {
   const startZ = PATH_PARAMS.Z_BOTTOM - PATH_PARAMS.R; 
   const endZ = PATH_PARAMS.Z_TOP + PATH_PARAMS.R;      
@@ -184,131 +175,46 @@ function WideTrack() {
     <group position={[0, TRACK_Y, 0]}>
       <mesh position={[0, -0.68, midZ]}>
         <boxGeometry args={[15, 0.18, Math.abs(LEN)]} />
-        <meshStandardMaterial color="#4a5060" roughness={0.85} metalness={0.05} />
+        <meshStandardMaterial color="#4a5060" roughness={0.80} metalness={0.05} />
       </mesh>
       {sleeperZs.map((z, i) => (
         <mesh key={i} position={[0, -0.50, z]}>
           <boxGeometry args={[13, 0.14, 0.32]} />
-          <meshStandardMaterial color="#5c3317" roughness={0.92} />
+          <meshStandardMaterial color="#5c3317" roughness={0.80} />
         </mesh>
       ))}
-      <mesh position={[-RAIL_X, -0.42, midZ]}>
-        <boxGeometry args={[0.24, 0.05, Math.abs(LEN)]} />
-        <meshStandardMaterial color="#6b7280" metalness={0.65} roughness={0.35} />
-      </mesh>
-      <mesh position={[-RAIL_X, -0.30, midZ]}>
-        <boxGeometry args={[0.07, 0.22, Math.abs(LEN)]} />
-        <meshStandardMaterial color="#8090a0" metalness={0.72} roughness={0.28} />
-      </mesh>
-      <mesh position={[-RAIL_X, -0.19, midZ]}>
-        <boxGeometry args={[0.18, 0.07, Math.abs(LEN)]} />
-        <meshStandardMaterial color="#c8d4e0" metalness={0.88} roughness={0.12} />
-      </mesh>
-      <mesh position={[RAIL_X, -0.42, midZ]}>
-        <boxGeometry args={[0.24, 0.05, Math.abs(LEN)]} />
-        <meshStandardMaterial color="#6b7280" metalness={0.65} roughness={0.35} />
-      </mesh>
-      <mesh position={[RAIL_X, -0.30, midZ]}>
-        <boxGeometry args={[0.07, 0.22, Math.abs(LEN)]} />
-        <meshStandardMaterial color="#8090a0" metalness={0.72} roughness={0.28} />
-      </mesh>
-      <mesh position={[RAIL_X, -0.19, midZ]}>
-        <boxGeometry args={[0.18, 0.07, Math.abs(LEN)]} />
-        <meshStandardMaterial color="#c8d4e0" metalness={0.88} roughness={0.12} />
-      </mesh>
+      <mesh position={[-RAIL_X, -0.42, midZ]}><boxGeometry args={[0.24, 0.05, Math.abs(LEN)]} /><meshStandardMaterial color="#6b7280" metalness={0.65} roughness={0.35} /></mesh>
+      <mesh position={[-RAIL_X, -0.30, midZ]}><boxGeometry args={[0.07, 0.22, Math.abs(LEN)]} /><meshStandardMaterial color="#8090a0" metalness={0.72} roughness={0.28} /></mesh>
+      <mesh position={[-RAIL_X, -0.19, midZ]}><boxGeometry args={[0.18, 0.07, Math.abs(LEN)]} /><meshStandardMaterial color="#c8d4e0" metalness={0.88} roughness={0.12} /></mesh>
+      <mesh position={[RAIL_X, -0.42, midZ]}><boxGeometry args={[0.24, 0.05, Math.abs(LEN)]} /><meshStandardMaterial color="#6b7280" metalness={0.65} roughness={0.35} /></mesh>
+      <mesh position={[RAIL_X, -0.30, midZ]}><boxGeometry args={[0.07, 0.22, Math.abs(LEN)]} /><meshStandardMaterial color="#8090a0" metalness={0.72} roughness={0.28} /></mesh>
+      <mesh position={[RAIL_X, -0.19, midZ]}><boxGeometry args={[0.18, 0.07, Math.abs(LEN)]} /><meshStandardMaterial color="#c8d4e0" metalness={0.88} roughness={0.12} /></mesh>
     </group>
   );
 }
 
-// ─── 幅広トロッコ ─────────────────────────────────────────
 function WideCart() {
-  const W    = CART_W;
-  const H    = 1.35;
-  const D    = 1.7;
-  const base = -0.30;
-  const Y    = TRACK_Y;
-
+  const W = CART_W, H = 1.35, D = 1.7, base = -0.30, Y = TRACK_Y;
   return (
     <group position={[0, Y, 0]}>
-      <mesh position={[-W / 2, base + H / 2, 0]}>
-        <boxGeometry args={[0.18, H, D]} />
-        <meshStandardMaterial color="#b45309" metalness={0.25} roughness={0.75} />
-      </mesh>
-      {[-0.55, 0, 0.55].map((z, i) => (
-        <mesh key={i} position={[-W / 2 - 0.03, base + H / 2, z]}>
-          <boxGeometry args={[0.08, H + 0.06, 0.12]} />
-          <meshStandardMaterial color="#78350f" metalness={0.5} />
-        </mesh>
-      ))}
-      <mesh position={[W / 2, base + H / 2, 0]}>
-        <boxGeometry args={[0.18, H, D]} />
-        <meshStandardMaterial color="#b45309" metalness={0.25} roughness={0.75} />
-      </mesh>
-      {[-0.55, 0, 0.55].map((z, i) => (
-        <mesh key={i} position={[W / 2 + 0.03, base + H / 2, z]}>
-          <boxGeometry args={[0.08, H + 0.06, 0.12]} />
-          <meshStandardMaterial color="#78350f" metalness={0.5} />
-        </mesh>
-      ))}
-      <mesh position={[0, base + H * 0.25, D / 2]}>
-        <boxGeometry args={[W + 0.14, H * 0.5, 0.12]} />
-        <meshStandardMaterial color="#92400e" metalness={0.4} roughness={0.6} transparent opacity={0.18} />
-      </mesh>
-      <mesh position={[0, base + H * 0.75, D / 2]}>
-        <boxGeometry args={[W + 0.14, H * 0.5, 0.12]} />
-        <meshStandardMaterial color="#92400e" metalness={0.4} roughness={0.6} transparent opacity={0.10} />
-      </mesh>
-      <mesh position={[0, base + H / 2, -D / 2]}>
-        <boxGeometry args={[W + 0.14, H, 0.12]} />
-        <meshStandardMaterial color="#78350f" metalness={0.35} roughness={0.65} />
-      </mesh>
-      <mesh position={[0, base, 0]}>
-        <boxGeometry args={[W, 0.1, D]} />
-        <meshStandardMaterial color="#1a0e04" roughness={1} />
-      </mesh>
-      {[-W / 2, W / 2].map((x, i) => (
-        <mesh key={i} position={[x, base + H + 0.045, 0]}>
-          <boxGeometry args={[0.22, 0.09, D + 0.16]} />
-          <meshStandardMaterial color="#6b3508" metalness={0.6} roughness={0.4} />
-        </mesh>
-      ))}
-      <mesh position={[0, base + H + 0.045, D / 2]}>
-        <boxGeometry args={[W + 0.26, 0.09, 0.16]} />
-        <meshStandardMaterial color="#6b3508" metalness={0.6} roughness={0.4} transparent opacity={0.30} />
-      </mesh>
-      <mesh position={[0, base + H + 0.045, -D / 2]}>
-        <boxGeometry args={[W + 0.26, 0.09, 0.16]} />
-        <meshStandardMaterial color="#6b3508" metalness={0.6} roughness={0.4} />
-      </mesh>
-      <mesh position={[0, base - 0.07, 0]}>
-        <boxGeometry args={[W + 0.22, 0.1, D + 0.18]} />
-        <meshStandardMaterial color="#374151" metalness={0.7} roughness={0.4} />
-      </mesh>
-      {[0.62, -0.62].map((z, i) => (
-        <mesh key={i} position={[0, base - 0.2, z]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.05, 0.05, W + 2.4, 8]} />
-          <meshStandardMaterial color="#1f2937" metalness={0.85} />
-        </mesh>
-      ))}
-      {[
-        [-W / 2 - 0.8, base - 0.2,  0.62],
-        [ W / 2 + 0.8, base - 0.2,  0.62],
-        [-W / 2 - 0.8, base - 0.2, -0.62],
-        [ W / 2 + 0.8, base - 0.2, -0.62],
-      ].map(([wx, wy, wz], i) => (
+      <mesh position={[-W / 2, base + H / 2, 0]}><boxGeometry args={[0.18, H, D]} /><meshStandardMaterial color="#b45309" metalness={0.25} roughness={0.70} /></mesh>
+      {[-0.55, 0, 0.55].map((z, i) => <mesh key={`l-${i}`} position={[-W / 2 - 0.03, base + H / 2, z]}><boxGeometry args={[0.08, H + 0.06, 0.12]} /><meshStandardMaterial color="#78350f" metalness={0.5} /></mesh>)}
+      <mesh position={[W / 2, base + H / 2, 0]}><boxGeometry args={[0.18, H, D]} /><meshStandardMaterial color="#b45309" metalness={0.25} roughness={0.70} /></mesh>
+      {[-0.55, 0, 0.55].map((z, i) => <mesh key={`r-${i}`} position={[W / 2 + 0.03, base + H / 2, z]}><boxGeometry args={[0.08, H + 0.06, 0.12]} /><meshStandardMaterial color="#78350f" metalness={0.5} /></mesh>)}
+      <mesh position={[0, base + H * 0.25, D / 2]}><boxGeometry args={[W + 0.14, H * 0.5, 0.12]} /><meshStandardMaterial color="#92400e" metalness={0.4} roughness={0.6} transparent opacity={0.18} /></mesh>
+      <mesh position={[0, base + H * 0.75, D / 2]}><boxGeometry args={[W + 0.14, H * 0.5, 0.12]} /><meshStandardMaterial color="#92400e" metalness={0.4} roughness={0.6} transparent opacity={0.10} /></mesh>
+      <mesh position={[0, base + H / 2, -D / 2]}><boxGeometry args={[W + 0.14, H, 0.12]} /><meshStandardMaterial color="#78350f" metalness={0.35} roughness={0.65} /></mesh>
+      <mesh position={[0, base, 0]}><boxGeometry args={[W, 0.1, D]} /><meshStandardMaterial color="#1a0e04" roughness={1} /></mesh>
+      {[-W / 2, W / 2].map((x, i) => <mesh key={i} position={[x, base + H + 0.045, 0]}><boxGeometry args={[0.22, 0.09, D + 0.16]} /><meshStandardMaterial color="#6b3508" metalness={0.6} roughness={0.4} /></mesh>)}
+      <mesh position={[0, base + H + 0.045, D / 2]}><boxGeometry args={[W + 0.26, 0.09, 0.16]} /><meshStandardMaterial color="#6b3508" metalness={0.6} roughness={0.4} transparent opacity={0.30} /></mesh>
+      <mesh position={[0, base + H + 0.045, -D / 2]}><boxGeometry args={[W + 0.26, 0.09, 0.16]} /><meshStandardMaterial color="#6b3508" metalness={0.6} roughness={0.4} /></mesh>
+      <mesh position={[0, base - 0.07, 0]}><boxGeometry args={[W + 0.22, 0.1, D + 0.18]} /><meshStandardMaterial color="#374151" metalness={0.7} roughness={0.4} /></mesh>
+      {[0.62, -0.62].map((z, i) => <mesh key={i} position={[0, base - 0.2, z]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.05, 0.05, W + 2.4, 8]} /><meshStandardMaterial color="#1f2937" metalness={0.85} /></mesh>)}
+      {[[-W / 2 - 0.8, base - 0.2, 0.62], [ W / 2 + 0.8, base - 0.2, 0.62], [-W / 2 - 0.8, base - 0.2, -0.62], [ W / 2 + 0.8, base - 0.2, -0.62]].map(([wx, wy, wz], i) => (
         <group key={i} position={[wx, wy, wz]}>
-          <mesh rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.25, 0.25, 0.13, 14]} />
-            <meshStandardMaterial color="#374151" metalness={0.7} roughness={0.3} />
-          </mesh>
-          <mesh rotation={[0, 0, Math.PI / 2]}>
-            <torusGeometry args={[0.23, 0.03, 6, 14]} />
-            <meshStandardMaterial color="#111827" metalness={0.3} roughness={0.8} />
-          </mesh>
-          <mesh rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.075, 0.075, 0.15, 8]} />
-            <meshStandardMaterial color="#9ca3af" metalness={0.8} />
-          </mesh>
+          <mesh rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.25, 0.25, 0.13, 14]} /><meshStandardMaterial color="#374151" metalness={0.7} roughness={0.3} /></mesh>
+          <mesh rotation={[0, 0, Math.PI / 2]}><torusGeometry args={[0.23, 0.03, 6, 14]} /><meshStandardMaterial color="#111827" metalness={0.3} roughness={0.8} /></mesh>
+          <mesh rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.075, 0.075, 0.15, 8]} /><meshStandardMaterial color="#9ca3af" metalness={0.8} /></mesh>
         </group>
       ))}
     </group>
@@ -344,7 +250,6 @@ function TrackSegment({ direction, segments = 250, yOffset = 0 }) {
     const t2 = (i + 1) / segments;
     const c1 = getOuterLoopPoint(direction, t1);
     const c2 = getOuterLoopPoint(direction, t2);
-
     const dx = c2.x - c1.x;
     const dz = c2.z - c1.z;
     const len = Math.sqrt(dx * dx + dz * dz);
@@ -381,22 +286,10 @@ function TrackSegment({ direction, segments = 250, yOffset = 0 }) {
 function SwitchLever({ position }) {
   return (
     <group position={position}>
-      <mesh position={[0, 0.25, 0]}>
-        <cylinderGeometry args={[0.5, 0.7, 0.5, 12]} />
-        <meshStandardMaterial color="#2d3748" roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 0.5, 0]}>
-        <boxGeometry args={[0.2, 0.1, 0.8]} />
-        <meshStandardMaterial color="#1a202c" />
-      </mesh>
-      <mesh position={[0, 0.85, 0]} rotation={[Math.PI / 5, 0, 0]}>
-        <cylinderGeometry args={[0.06, 0.06, 1.4, 8]} />
-        <meshStandardMaterial color="#a0aec0" metalness={0.6} roughness={0.3} />
-      </mesh>
-      <mesh position={[0, 1.4, 0.4]} rotation={[0, 0, 0]}>
-        <sphereGeometry args={[0.2, 16, 16]} />
-        <meshStandardMaterial color="#4a5568" roughness={0.7} />
-      </mesh>
+      <mesh position={[0, 0.25, 0]}><cylinderGeometry args={[0.5, 0.7, 0.5, 12]} /><meshStandardMaterial color="#2d3748" roughness={0.8} /></mesh>
+      <mesh position={[0, 0.5, 0]}><boxGeometry args={[0.2, 0.1, 0.8]} /><meshStandardMaterial color="#1a202c" /></mesh>
+      <mesh position={[0, 0.85, 0]} rotation={[Math.PI / 5, 0, 0]}><cylinderGeometry args={[0.06, 0.06, 1.4, 8]} /><meshStandardMaterial color="#a0aec0" metalness={0.6} roughness={0.3} /></mesh>
+      <mesh position={[0, 1.4, 0.4]} rotation={[0, 0, 0]}><sphereGeometry args={[0.2, 16, 16]} /><meshStandardMaterial color="#4a5568" roughness={0.7} /></mesh>
     </group>
   );
 }
@@ -407,6 +300,252 @@ function TrackFork() {
       <TrackSegment direction="left" segments={250} yOffset={0.001} />
       <TrackSegment direction="right" segments={250} yOffset={0.002} />
       <SwitchLever position={[4.25, TRACK_Y - 0.68, PATH_PARAMS.Z_TOP + PATH_PARAMS.R + 1]} />
+    </group>
+  );
+}
+
+// ─── 追加：レンガ壁のパーツ群 ──────────────────────────────
+const WallPart = ({ cx, cz, len, thickness, height, ang, tex, uOffset = 0 }) => {
+  const mat = useMemo(() => {
+    if (!tex) return null;
+    const m = new THREE.MeshStandardMaterial({ map: tex.clone(), color: '#ffffff', roughness: 0.8 });
+    m.map.repeat.set(len / 5, 4); 
+    m.map.offset.set(uOffset, 0); 
+    m.map.wrapS = THREE.RepeatWrapping;
+    m.map.wrapT = THREE.RepeatWrapping;
+    if (THREE.SRGBColorSpace) m.map.colorSpace = THREE.SRGBColorSpace;
+    m.map.needsUpdate = true;
+    return m;
+  }, [tex, len, uOffset]);
+
+  if (!mat) {
+    return (
+      <mesh position={[cx, TRACK_Y + height/2, cz]} rotation={[0, ang, 0]}>
+        <boxGeometry args={[thickness, height, len]} />
+        <meshStandardMaterial color="#888888" />
+      </mesh>
+    );
+  }
+
+  return (
+    <mesh position={[cx, TRACK_Y + height/2, cz]} rotation={[0, ang, 0]} material={mat}>
+      <boxGeometry args={[thickness, height, len]} />
+    </mesh>
+  );
+};
+
+const CornerWall = ({ cx, cz, r, startAngle, endAngle, tex, height, thickness }) => {
+  const segments = 12;
+  const parts = [];
+  const angleStep = (endAngle - startAngle) / segments;
+  let currentUOffset = 0;
+  
+  for(let i=0; i<segments; i++) {
+    const a1 = startAngle + i * angleStep;
+    const a2 = startAngle + (i + 1) * angleStep;
+    const p1x = cx + r * Math.cos(a1);
+    const p1z = cz + r * Math.sin(a1);
+    const p2x = cx + r * Math.cos(a2);
+    const p2z = cz + r * Math.sin(a2);
+    const midX = (p1x + p2x) / 2;
+    const midZ = (p1z + p2z) / 2;
+    const dx = p2x - p1x;
+    const dz = p2z - p1z;
+    const len = Math.sqrt(dx*dx + dz*dz);
+    const ang = Math.atan2(dx, dz);
+    
+    parts.push(
+      <WallPart key={i} cx={midX} cz={midZ} len={len + 0.1} thickness={thickness} height={height} ang={ang} tex={tex} uOffset={currentUOffset} />
+    );
+    currentUOffset += len / 5;
+  }
+  return <group>{parts}</group>;
+};
+
+function BrickWalls() {
+  const [texture, setTexture] = useState(null);
+
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    loader.load(
+      rengaTexture,
+      (tex) => {
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+        else tex.encoding = 3001; 
+        setTexture(tex);
+      },
+      undefined,
+      (err) => console.error("レンガ画像の読み込みエラー:", err)
+    );
+  }, []);
+
+  const matIsland = useMemo(() => {
+    if (!texture) return null;
+    const m = new THREE.MeshStandardMaterial({ map: texture.clone(), color: '#ffffff', roughness: 0.8 });
+    m.map.repeat.set(6, 4);
+    m.map.needsUpdate = true;
+    return m;
+  }, [texture]);
+
+  const H = 13.5; 
+  const Y = TRACK_Y + H / 2;
+
+  if (!matIsland) {
+    return (
+      <group>
+        <mesh position={[-10.5, Y, -25]}><boxGeometry args={[10, H, 38]} /><meshStandardMaterial color="#888888" /></mesh>
+        <mesh position={[10.5, Y, -25]}><boxGeometry args={[10, H, 38]} /><meshStandardMaterial color="#888888" /></mesh>
+      </group>
+    );
+  }
+
+  return (
+    <group>
+      <mesh position={[-10.5, Y, -25]} material={matIsland}><boxGeometry args={[10, H, 38]} /></mesh>
+      <mesh position={[10.5, Y, -25]} material={matIsland}><boxGeometry args={[10, H, 38]} /></mesh>
+
+      <WallPart cx={0} cz={-58.5} len={30} thickness={2} height={H} ang={Math.PI/2} tex={texture} />
+      <WallPart cx={0} cz={8.5} len={30} thickness={2} height={H} ang={Math.PI/2} tex={texture} />
+      <WallPart cx={-29.5} cz={-25} len={38} thickness={2} height={H} ang={0} tex={texture} />
+      <WallPart cx={29.5} cz={-25} len={38} thickness={2} height={H} ang={0} tex={texture} />
+
+      <CornerWall cx={-15} cz={-44} r={14.5} startAngle={Math.PI} endAngle={3*Math.PI/2} tex={texture} height={H} thickness={2} />
+      <CornerWall cx={15} cz={-44} r={14.5} startAngle={3*Math.PI/2} endAngle={2*Math.PI} tex={texture} height={H} thickness={2} />
+      <CornerWall cx={-15} cz={-6} r={14.5} startAngle={Math.PI/2} endAngle={Math.PI} tex={texture} height={H} thickness={2} />
+      <CornerWall cx={15} cz={-6} r={14.5} startAngle={0} endAngle={Math.PI/2} tex={texture} height={H} thickness={2} />
+    </group>
+  );
+}
+
+// ─── 追加：坑道の木組み（柱とXブレース）を描画するコンポーネント ────────
+const TimberPanel = ({ p1, p2, height, mat }) => {
+  const dx = p2.x - p1.x;
+  const dz = p2.z - p1.z;
+  const L = Math.sqrt(dx*dx + dz*dz);
+  if (L === 0) return null;
+
+  const ang = Math.atan2(dx, dz);
+  const cx = (p1.x + p2.x) / 2;
+  const cz = (p1.z + p2.z) / 2;
+
+  // 壁の法線方向（内側）を計算
+  let nx = p1.nx + p2.nx;
+  let nz = p1.nz + p2.nz;
+  const nlen = Math.sqrt(nx*nx + nz*nz);
+  if (nlen > 0) { nx /= nlen; nz /= nlen; }
+  else { nx = p1.nx; nz = p1.nz; }
+
+  // 壁から少しだけ浮かせてめり込みを防ぐ
+  const inset = 0.3;
+  const gx = cx + nx * inset;
+  const gz = cz + nz * inset;
+
+  const thick = 0.5;
+  const braceLen = Math.sqrt(L*L + height*height);
+  const braceAng = Math.atan2(L, height);
+
+  return (
+    <group position={[gx, TRACK_Y, gz]} rotation={[0, ang, 0]}>
+      {/* 左右の柱 */}
+      <mesh position={[0, height/2, -L/2]} material={mat}><boxGeometry args={[thick, height, thick]} /></mesh>
+      <mesh position={[0, height/2, L/2]} material={mat}><boxGeometry args={[thick, height, thick]} /></mesh>
+
+      {/* 上・下・中段の梁 */}
+      <mesh position={[0, height - thick/2, 0]} material={mat}><boxGeometry args={[thick, thick, L]} /></mesh>
+      <mesh position={[0, height * 0.4, 0]} material={mat}><boxGeometry args={[thick, thick, L]} /></mesh>
+      <mesh position={[0, thick/2, 0]} material={mat}><boxGeometry args={[thick, thick, L]} /></mesh>
+
+      {/* Xブレース */}
+      <mesh position={[0, height/2, 0]} rotation={[braceAng, 0, 0]} material={mat}><boxGeometry args={[thick*0.8, braceLen, thick*0.8]} /></mesh>
+      <mesh position={[0, height/2, 0]} rotation={[-braceAng, 0, 0]} material={mat}><boxGeometry args={[thick*0.8, braceLen, thick*0.8]} /></mesh>
+    </group>
+  );
+};
+
+// 経路から一定間隔でポイントを生成する関数
+const buildPath = (def, interval) => {
+  let pts = [];
+  for (const seg of def) {
+    if (seg.type === 'straight') {
+      const dx = seg.x2 - seg.x1;
+      const dz = seg.z2 - seg.z1;
+      const len = Math.sqrt(dx*dx + dz*dz);
+      const steps = Math.ceil(len / interval);
+      for (let i = 0; i < steps; i++) {
+        pts.push({ x: seg.x1 + (dx*i)/steps, z: seg.z1 + (dz*i)/steps, nx: seg.nx, nz: seg.nz });
+      }
+    } else if (seg.type === 'arc') {
+      const range = seg.a2 - seg.a1;
+      const len = Math.abs(range) * seg.r;
+      const steps = Math.ceil(len / interval);
+      for (let i = 0; i < steps; i++) {
+        const a = seg.a1 + (range*i)/steps;
+        pts.push({ x: seg.cx + seg.r * Math.cos(a), z: seg.cz + seg.r * Math.sin(a), nx: -Math.cos(a), nz: -Math.sin(a) });
+      }
+    }
+  }
+  const last = def[def.length - 1];
+  if (last.type === 'straight') {
+    pts.push({ x: last.x2, z: last.z2, nx: last.nx, nz: last.nz });
+  } else {
+    const a = last.a2;
+    pts.push({ x: last.cx + last.r * Math.cos(a), z: last.cz + last.r * Math.sin(a), nx: -Math.cos(a), nz: -Math.sin(a) });
+  }
+  return pts;
+};
+
+function TimberFrames() {
+  const woodMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#3d1f0f", roughness: 0.95, metalness: 0.05 }), []);
+  const H = 13.5;
+  const interval = 4.5; // Xブレースの間隔
+
+  // 坑道を一周する壁の座標定義
+  const outerLeftDef = [
+    { type: 'straight', x1: 0, z1: -57.5, x2: -15, z2: -57.5, nx: 0, nz: 1 },
+    { type: 'arc', cx: -15, cz: -44, r: 13.5, a1: -Math.PI/2, a2: -Math.PI }, 
+    { type: 'straight', x1: -28.5, z1: -44, x2: -28.5, z2: -6, nx: 1, nz: 0 },
+    { type: 'arc', cx: -15, cz: -6, r: 13.5, a1: Math.PI, a2: Math.PI/2 }, 
+    { type: 'straight', x1: -15, z1: 7.5, x2: 0, z2: 7.5, nx: 0, nz: -1 }
+  ];
+
+  const outerRightDef = [
+    { type: 'straight', x1: 0, z1: -57.5, x2: 15, z2: -57.5, nx: 0, nz: 1 },
+    { type: 'arc', cx: 15, cz: -44, r: 13.5, a1: -Math.PI/2, a2: 0 },
+    { type: 'straight', x1: 28.5, z1: -44, x2: 28.5, z2: -6, nx: -1, nz: 0 },
+    { type: 'arc', cx: 15, cz: -6, r: 13.5, a1: 0, a2: Math.PI/2 },
+    { type: 'straight', x1: 15, z1: 7.5, x2: 0, z2: 7.5, nx: 0, nz: -1 }
+  ];
+
+  const leftIslandDef = [
+    { type: 'straight', x1: -5.5, z1: -6, x2: -5.5, z2: -44, nx: 1, nz: 0 },
+    { type: 'straight', x1: -5.5, z1: -44, x2: -15.5, z2: -44, nx: 0, nz: 1 },
+    { type: 'straight', x1: -15.5, z1: -44, x2: -15.5, z2: -6, nx: -1, nz: 0 },
+    { type: 'straight', x1: -15.5, z1: -6, x2: -5.5, z2: -6, nx: 0, nz: -1 }
+  ];
+
+  const rightIslandDef = [
+    { type: 'straight', x1: 5.5, z1: -44, x2: 5.5, z2: -6, nx: -1, nz: 0 },
+    { type: 'straight', x1: 5.5, z1: -6, x2: 15.5, z2: -6, nx: 0, nz: -1 },
+    { type: 'straight', x1: 15.5, z1: -6, x2: 15.5, z2: -44, nx: 1, nz: 0 },
+    { type: 'straight', x1: 15.5, z1: -44, x2: 5.5, z2: -44, nx: 0, nz: 1 }
+  ];
+
+  const defs = [outerLeftDef, outerRightDef, leftIslandDef, rightIslandDef];
+
+  const renderPanels = (def) => {
+    const pts = buildPath(def, interval);
+    const panels = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      panels.push(<TimberPanel key={i} p1={pts[i]} p2={pts[i+1]} height={H} mat={woodMat} />);
+    }
+    return panels;
+  };
+
+  return (
+    <group>
+      {defs.map((def, idx) => <group key={idx}>{renderPanels(def)}</group>)}
     </group>
   );
 }
@@ -426,9 +565,7 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
   const [resultVisible, setResultVisible] = useState(false);
   const resultVisibleRef = useRef(false);
 
-  const toggleView = useCallback(() => {
-    setViewMode((prev) => (prev === 'normal' ? 'top' : 'normal'));
-  }, []);
+  const toggleView = useCallback(() => setViewMode((prev) => (prev === 'normal' ? 'top' : 'normal')), []);
 
   const triggerBranch = useCallback((direction) => {
     if (branchAnimRef.current) return;
@@ -442,11 +579,8 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
     onVotesChange?.(v);
   }, [onVotesChange]);
 
-  useEffect(() => {
-    onBranchCompleteRef.current = onBranchComplete;
-  }, [onBranchComplete]);
+  useEffect(() => { onBranchCompleteRef.current = onBranchComplete; }, [onBranchComplete]);
 
-  // 親コンポーネントから分岐指示を受け取ったらアニメーションを開始する
   useEffect(() => {
     if (pendingBranch && !branchAnimRef.current) {
       triggerBranch(pendingBranch);
@@ -502,15 +636,12 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
             branchAnimRef.current = null;
             setBranching(false);
             onBranchCompleteRef.current?.();
-            
           }
         }
       }
 
-      // ビデオパネルの回転(傾き)同期
       if (videoPanelRef.current) {
-        videoPanelRef.current.style.transform =
-          `translateX(-50%) rotate(${tiltRef.current.toFixed(3)}deg)`;
+        videoPanelRef.current.style.transform = `translateX(-50%) rotate(${tiltRef.current.toFixed(3)}deg)`;
       }
       
       animRef.current = requestAnimationFrame(animate);
@@ -539,11 +670,14 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
         >
           <CameraController viewMode={viewMode} cartPosRef={cartPosRef} tiltRef={tiltRef} />
           
-          <ambientLight intensity={0.85} />
-          <directionalLight position={[4, 10, 6]}  intensity={1.6} castShadow />
-          <directionalLight position={[0, 6, 2]}   intensity={1.4} color="#fff8f0" />
-          <directionalLight position={[-4, 4, -3]} intensity={0.5} color="#7799cc" />
-          <pointLight position={[0, 0.5, 1]} intensity={1.2} distance={12} color="#fff5e0" />
+          <ambientLight intensity={1.5} color="#ffffff" />
+          <directionalLight position={[4, 10, 6]}  intensity={2.5} color="#ffffff" castShadow />
+          <directionalLight position={[0, 6, 2]}   intensity={2.0} color="#ffffff" />
+          <directionalLight position={[-4, 4, -3]} intensity={1.2} color="#ffffff" />
+          <pointLight position={[0, 0.5, 1]} intensity={3.0} distance={20} color="#ffffff" />
+          
+          <BrickWalls /> 
+          <TimberFrames />
           
           <WideTrack />
           <TrackFork />
@@ -586,113 +720,18 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
   );
 }
 
-// ─── スタイル ─────────────────────────────────────────────
 const styles = {
-  root: {
-    position: 'relative',
-    height: '100vh',
-    background: '#0d0d1a',
-    overflow: 'hidden',
-  },
-  canvasWrap: {
-    position: 'absolute',
-    inset: 0,
-  },
-  videoPanel: {
-    position: 'absolute',
-    bottom: '30%', 
-    left: '50%',
-    transform: 'translateX(-50%)',
-    height: '55%', 
-    aspectRatio: '15/9',
-    overflow: 'hidden',
-    borderRadius: 6,
-    zIndex: 10,
-  },
-  overlay: {
-    position: 'absolute',
-    top: 12, right: 12,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    gap: 8,
-    zIndex: 100,
-  },
-  voteBadge: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    background: 'rgba(0,0,0,0.65)',
-    borderRadius: 20,
-    padding: '8px 14px',
-    minWidth: 220,
-    backdropFilter: 'blur(4px)',
-  },
-  sideLabel: {
-    fontSize: 13,
-    fontWeight: 700,
-    whiteSpace: 'nowrap',
-    fontFamily: 'monospace',
-  },
-  barWrap: {
-    flex: 1,
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
-    display: 'flex',
-    background: 'rgba(255,255,255,0.15)',
-  },
-  barFill: {
-    height: '100%',
-    transition: 'width 0.3s ease',
-  },
-  timeoutOverlay: {
-    position: 'absolute',
-    inset: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 200,
-    pointerEvents: 'none',
-  },
-  timeoutText: {
-    fontSize: 120,
-    fontWeight: 900,
-    fontFamily: 'monospace',
-    color: '#fbbf24',
-    textShadow: '0 0 40px rgba(251,191,36,0.9), 0 4px 24px rgba(0,0,0,0.9)',
-    letterSpacing: '-0.05em',
-    animation: 'none',
-    opacity: 0.92,
-  },
-  resultOverlay: {
-    position: 'absolute',
-    inset: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 150,
-    pointerEvents: 'none',
-  },
-  resultText: {
-    fontSize: 96,
-    fontWeight: 900,
-    fontFamily: 'monospace',
-    textShadow: '0 0 40px rgba(0,0,0,0.8), 0 4px 24px rgba(0,0,0,0.9)',
-    letterSpacing: '-0.03em',
-    opacity: 0.95,
-  },
-  viewBtn: {
-    background: 'rgba(0,0,0,0.65)',
-    border: '1px solid rgba(255,255,255,0.25)',
-    borderRadius: 12,
-    color: '#e2e8f0',
-    fontSize: 12,
-    fontWeight: 700,
-    padding: '7px 14px',
-    cursor: 'pointer',
-    backdropFilter: 'blur(4px)',
-    fontFamily: 'monospace',
-    letterSpacing: '0.03em',
-  },
+  root: { position: 'relative', height: '100vh', background: '#0d0d1a', overflow: 'hidden' },
+  canvasWrap: { position: 'absolute', inset: 0 },
+  videoPanel: { position: 'absolute', bottom: '30%', left: '50%', transform: 'translateX(-50%)', height: '55%', aspectRatio: '15/9', overflow: 'hidden', borderRadius: 6, zIndex: 10 },
+  overlay: { position: 'absolute', top: 12, right: 12, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, zIndex: 100 },
+  voteBadge: { display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,0,0,0.65)', borderRadius: 20, padding: '8px 14px', minWidth: 220, backdropFilter: 'blur(4px)' },
+  sideLabel: { fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', fontFamily: 'monospace' },
+  barWrap: { flex: 1, height: 8, borderRadius: 4, overflow: 'hidden', display: 'flex', background: 'rgba(255,255,255,0.15)' },
+  barFill: { height: '100%', transition: 'width 0.3s ease' },
+  timeoutOverlay: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, pointerEvents: 'none' },
+  timeoutText: { fontSize: 120, fontWeight: 900, fontFamily: 'monospace', color: '#fbbf24', textShadow: '0 0 40px rgba(251,191,36,0.9), 0 4px 24px rgba(0,0,0,0.9)', letterSpacing: '-0.05em', opacity: 0.92 },
+  resultOverlay: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 150, pointerEvents: 'none' },
+  resultText: { fontSize: 96, fontWeight: 900, fontFamily: 'monospace', textShadow: '0 0 40px rgba(0,0,0,0.8), 0 4px 24px rgba(0,0,0,0.9)', letterSpacing: '-0.03em', opacity: 0.95 },
+  viewBtn: { background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: 12, color: '#e2e8f0', fontSize: 12, fontWeight: 700, padding: '7px 14px', cursor: 'pointer', backdropFilter: 'blur(4px)', fontFamily: 'monospace', letterSpacing: '0.03em' },
 };
