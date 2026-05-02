@@ -146,7 +146,7 @@ function CameraController({ viewMode, cartPosRef }) {
       // トロッコの進行方向に合わせてオフセットを回転
       const euler = new THREE.Euler(0, rotY, 0, 'YXZ');
 
-      const posOffset = new THREE.Vector3(0, 2.5, 5.5);
+      const posOffset = new THREE.Vector3(0, 3.5, 9.5);
       posOffset.applyEuler(euler);
 
       const lookOffset = new THREE.Vector3(0, 0.5, -5.0);
@@ -159,9 +159,9 @@ function CameraController({ viewMode, cartPosRef }) {
 
       camera.fov = 50;
     } else {
-      camera.position.set(cx, 90.0, cz + 10);
+      camera.position.set(cx, 130.0, cz + 30);
       camera.up.set(0, 0, -1);
-      camera.lookAt(cx, TRACK_Y, cz + 2.5);
+      camera.lookAt(cx, TRACK_Y, cz + 30);
       camera.fov = 45;
     }
 
@@ -413,12 +413,13 @@ function TrackFork() {
 
 // ─── プレイ画面 ──────────────────────────────────────────
 export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, onHandRaised, onVotesChange, timeoutLabel, hintText, correctBranch }) {
-  const votesRef      = useRef({ left: 0, right: 0 });
-  const tiltRef       = useRef(0);
-  const videoPanelRef = useRef(null);
-  const animRef       = useRef(null);
-  const cartPosRef    = useRef({ x: 0, z: PATH_PARAMS.INITIAL_Z, rotY: 0 });
-  const branchAnimRef = useRef(null);
+  const votesRef           = useRef({ left: 0, right: 0 });
+  const tiltRef            = useRef(0);
+  const videoPanelRef      = useRef(null);
+  const animRef            = useRef(null);
+  const cartPosRef         = useRef({ x: 0, z: PATH_PARAMS.INITIAL_Z, rotY: 0 });
+  const branchAnimRef      = useRef(null);
+  const onBranchCompleteRef = useRef(onBranchComplete);
   const [votesDisplay, setVotesDisplay] = useState({ left: 0, right: 0 });
   const [viewMode, setViewMode]         = useState('normal');
   const [branching, setBranching]       = useState(false);
@@ -440,6 +441,10 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
     setVotesDisplay(v);
     onVotesChange?.(v);
   }, [onVotesChange]);
+
+  useEffect(() => {
+    onBranchCompleteRef.current = onBranchComplete;
+  }, [onBranchComplete]);
 
   // 親コンポーネントから分岐指示を受け取ったらアニメーションを開始する
   useEffect(() => {
@@ -496,7 +501,7 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
             cartPosRef.current = { x: 0, z: initialZ, rotY: 0 };
             branchAnimRef.current = null;
             setBranching(false);
-            onBranchComplete?.();
+            onBranchCompleteRef.current?.();
             
           }
         }
@@ -595,10 +600,10 @@ const styles = {
   },
   videoPanel: {
     position: 'absolute',
-    bottom: '20%', 
+    bottom: '30%', 
     left: '50%',
     transform: 'translateX(-50%)',
-    height: '65%', 
+    height: '55%', 
     aspectRatio: '15/9',
     overflow: 'hidden',
     borderRadius: 6,

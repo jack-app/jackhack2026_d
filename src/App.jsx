@@ -8,7 +8,10 @@ import Selector from './components/Selector';
 
 const QUESTIONS = [
   { id: 1, text: "電気抵抗の単位は？", choices: ["Ω", "V"], currentDirection: "left", hint: "ギリシャ文字です", difficulty: "easy" },
-  { id: 2, text: "Reactで状態を管理するのは？", choices: ["useState", "useEffect"], currentDirection: "left", hint: "名前の通りです", difficulty: "hard" },
+  { id: 2, text: "水の化学式は？", choices: ["H2O", "CO2"], currentDirection: "left", hint: "水素と酸素でできています", difficulty: "easy" },
+  { id: 3, text: "光の速さに最も近いのは？", choices: ["30万m/s", "30万km/s"], currentDirection: "right", hint: "非常に速いです", difficulty: "easy" },
+  { id: 4, text: "円周率 π の近似値は？", choices: ["2.71", "3.14"], currentDirection: "right", hint: "円の直径と周の比です", difficulty: "easy" },
+  { id: 5, text: "Reactで状態を管理するのは？", choices: ["useState", "useEffect"], currentDirection: "left", hint: "名前の通りです", difficulty: "hard" },
 ];
 
 const NARRATIONS = {
@@ -50,7 +53,7 @@ function App() {
   const nextActionRef = useRef(null);
 
   const filteredQuestions = QUESTIONS.filter(q => q.difficulty === difficulty);
-  const selectionPoints = [0, 3, QUESTIONS.length - 1];
+  const selectionPoints = [0];
 
   const handleStart = () => {
     setScene('quiz');
@@ -67,6 +70,9 @@ function App() {
     setScene('start');
     setShowSelector(false);
     setIsDifficultySelected(false);
+    setPendingBranch(null);
+    setCorrectBranch(null);
+    nextActionRef.current = null;
   };
 
   const currentNarration = scene === 'finish'
