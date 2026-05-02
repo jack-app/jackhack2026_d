@@ -449,7 +449,9 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
   }, [pendingBranch, triggerBranch]);
 
   useEffect(() => {
+    let isMounted = true;
     const animate = () => {
+      if (!isMounted) return;
       const { left, right } = votesRef.current;
       const total      = left + right;
       const normalized = total > 0 ? (right - left) / total : 0;
@@ -495,6 +497,7 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
             branchAnimRef.current = null;
             setBranching(false);
             onBranchComplete?.();
+            
           }
         }
       }
@@ -508,7 +511,10 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
       animRef.current = requestAnimationFrame(animate);
     };
     animRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animRef.current);
+    return () => {
+      isMounted = false; 
+      cancelAnimationFrame(animRef.current);
+    };
   }, []);
 
   const total   = votesDisplay.left + votesDisplay.right;
@@ -543,7 +549,7 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
       </div>
 
       <div ref={videoPanelRef} style={{ ...styles.videoPanel, visibility: viewMode === 'top' ? 'hidden' : 'visible' }}>
-        <PoseDetector onVotes={handleVotes} onHandRaised={onHandRaised} hintText={hintText} />
+        <PoseDetector onVotes={handleVotes} onHandRaised={onHandRaised} hintText={hintText} disableHint={pendingBranch != null}/>
       </div>
 
       {timeoutLabel && (
@@ -560,12 +566,12 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
 
       <div style={styles.overlay}>
         <div style={styles.voteBadge}>
-          <span style={{ ...styles.sideLabel, color: '#60a5fa' }}>⬅ {votesDisplay.left}人</span>
+          <span style={{ ...styles.sideLabel, color: '#5DCAA5' }}>⬅ {votesDisplay.left}人</span>
           <div style={styles.barWrap}>
-            <div style={{ ...styles.barFill, width: `${leftPct}%`,      background: '#60a5fa' }} />
-            <div style={{ ...styles.barFill, width: `${100 - leftPct}%`, background: '#f97316' }} />
+            <div style={{ ...styles.barFill, width: `${leftPct}%`,      background: '#5DCAA5' }} />
+            <div style={{ ...styles.barFill, width: `${100 - leftPct}%`, background: '#E23636' }} />
           </div>
-          <span style={{ ...styles.sideLabel, color: '#f97316' }}>{votesDisplay.right}人 ➡</span>
+          <span style={{ ...styles.sideLabel, color: '#E23636' }}>{votesDisplay.right}人 ➡</span>
         </div>
         <button onClick={toggleView} style={styles.viewBtn}>
           {viewMode === 'normal' ? '▲ Top View' : '▼ Normal View'}
