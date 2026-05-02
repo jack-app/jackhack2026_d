@@ -13,6 +13,7 @@ export default function QuizPage({
   onUseHint,
   isHintVisible,
   pendingBranch,
+  correctBranch,
   onBranchComplete,
   questionIndex,
   totalQuestions,
@@ -52,6 +53,7 @@ export default function QuizPage({
             currentData={currentData}
             onAnswer={onAnswer}
             pendingBranch={pendingBranch}
+            correctBranch={correctBranch}
             onBranchComplete={onBranchComplete}
             onUseHint={onUseHint}
             timeLeft={timeLeft}

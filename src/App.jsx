@@ -46,6 +46,7 @@ function App() {
   const [isDifficultySelected, setIsDifficultySelected] = useState(false);
   const [showSelector, setShowSelector] = useState(false);
   const [pendingBranch, setPendingBranch] = useState(null);
+  const [correctBranch, setCorrectBranch] = useState(null);
   const pendingNavigateRef = useRef(null);
 
   const filteredQuestions = QUESTIONS.filter(q => q.difficulty === difficulty);
@@ -92,12 +93,14 @@ function App() {
       pendingNavigateRef.current = null;
     }
     setPendingBranch(null);
+    setCorrectBranch(null);
   };
 
   const handleAnswer = (choice, navigate) => {
     const branchDir = choice === filteredQuestions[currentIndex].choices[0] ? 'left' : 'right';
     const isCorrect = branchDir === filteredQuestions[currentIndex].currentDirection;
     setPendingBranch(branchDir);
+    setCorrectBranch(filteredQuestions[currentIndex].currentDirection);
 
     pendingNavigateRef.current = {
       navigate,
@@ -152,6 +155,7 @@ function App() {
                 onUseHint={useHint}
                 isHintVisible={isHintVisible}
                 pendingBranch={pendingBranch}
+                correctBranch={correctBranch}
                 onBranchComplete={handleBranchComplete}
                 questionIndex={currentIndex + 1}
                 totalQuestions={filteredQuestions.length}

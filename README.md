@@ -243,6 +243,44 @@ QuizBoard.jsx     問題文エリアにヒントテキストを表示
 
 ---
 
+## 正誤フィードバックオーバーレイ
+
+トロッコが分岐先から戻ってくる `return-arc` フェーズ（5秒間）の間、AR シーンに正誤結果を全画面オーバーレイで表示する。
+
+### 表示タイミング
+
+| フェーズ | オーバーレイ |
+|---|---|
+| branch（3秒） | 非表示（投票中） |
+| **return-arc（5秒）** | **表示** |
+| return-straight（2.5秒）以降 | 非表示 |
+
+### 表示内容
+
+| 条件 | テキスト | 色 |
+|---|---|---|
+| `pendingBranch === correctBranch` | 正解！ | 緑 `#22c55e` |
+| `pendingBranch !== correctBranch` | 不正解... | 赤 `#ef4444` |
+
+### Props フロー（追加分）
+
+```
+App.jsx  handleAnswer で setCorrectBranch(currentDirection)
+  ↓ correctBranch: 'left' | 'right' | null
+QuizPage.jsx
+  ↓
+ARPanel.jsx
+  ↓
+AR.jsx（DevTrolleyPlayScreen） → 正誤オーバーレイ表示
+```
+
+### 実装上の注意
+
+- `rAF` ループは `useEffect([], [])` のクロージャ内で動くため、通常の state は古い値しか読めない。`resultVisibleRef`（ref）でループ内判定し、`setResultVisible`（state）でレンダリングをトリガーする二重管理方式を採用。既存の `votesRef` + `votesDisplay` パターンと同一。
+- zIndex: 150（投票バッジ 100 より上、タイムアウトラベル 200 より下）
+
+---
+
 ## 技術スタック
 
 | ライブラリ | 用途 |

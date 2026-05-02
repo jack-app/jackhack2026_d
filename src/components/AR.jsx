@@ -412,7 +412,7 @@ function TrackFork() {
 }
 
 // ─── プレイ画面 ──────────────────────────────────────────
-export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, onHandRaised, onVotesChange, timeoutLabel, hintText }) {
+export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, onHandRaised, onVotesChange, timeoutLabel, hintText, correctBranch }) {
   const votesRef      = useRef({ left: 0, right: 0 });
   const tiltRef       = useRef(0);
   const videoPanelRef = useRef(null);
@@ -422,6 +422,8 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
   const [votesDisplay, setVotesDisplay] = useState({ left: 0, right: 0 });
   const [viewMode, setViewMode]         = useState('normal');
   const [branching, setBranching]       = useState(false);
+  const [resultVisible, setResultVisible] = useState(false);
+  const resultVisibleRef = useRef(false);
 
   const toggleView = useCallback(() => {
     setViewMode((prev) => (prev === 'normal' ? 'top' : 'normal'));
@@ -463,8 +465,10 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
           const pos = getCartPoint(anim.direction, 'branch', t);
           const tan = getCartTangent(anim.direction, 'branch', t);
           cartPosRef.current = { x: pos.x, z: pos.z, rotY: Math.atan2(-tan.x, -tan.z) };
-          if (t >= 1) {
+          if (t >= 1 && !resultVisibleRef.current) {
             branchAnimRef.current = { phase: 'return-arc', startTime: Date.now(), direction: anim.direction };
+            resultVisibleRef.current = true;
+            setResultVisible(true);
           }
         } else if (anim.phase === 'return-arc') {
           const t = Math.min(elapsed / RETURN_ARC_DURATION, 1);
@@ -476,6 +480,8 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
             while (startRotY > Math.PI) startRotY -= 2 * Math.PI;
             while (startRotY <= -Math.PI) startRotY += 2 * Math.PI;
             branchAnimRef.current = { phase: 'return-straight', startTime: Date.now(), startRotY };
+            resultVisibleRef.current = false;
+            setResultVisible(false);
           }
         } else if (anim.phase === 'return-straight') {
           const t = Math.min(elapsed / RETURN_STRAIGHT_DURATION, 1);
@@ -508,6 +514,10 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
   const total   = votesDisplay.left + votesDisplay.right;
   const leftPct = total > 0 ? Math.round((votesDisplay.left / total) * 100) : 50;
 
+  const isCorrect   = pendingBranch != null && correctBranch != null ? pendingBranch === correctBranch : null;
+  const resultText  = isCorrect ? '正解！' : '不正解...';
+  const resultColor = isCorrect ? '#22c55e' : '#ef4444';
+
   return (
     <div style={styles.root}>
       <div style={styles.canvasWrap}>
@@ -539,6 +549,12 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
       {timeoutLabel && (
         <div style={styles.timeoutOverlay}>
           <span style={styles.timeoutText}>{timeoutLabel}</span>
+        </div>
+      )}
+
+      {resultVisible && (
+        <div style={styles.resultOverlay}>
+          <span style={{ ...styles.resultText, color: resultColor }}>{resultText}</span>
         </div>
       )}
 
@@ -637,6 +653,23 @@ const styles = {
     letterSpacing: '-0.05em',
     animation: 'none',
     opacity: 0.92,
+  },
+  resultOverlay: {
+    position: 'absolute',
+    inset: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 150,
+    pointerEvents: 'none',
+  },
+  resultText: {
+    fontSize: 96,
+    fontWeight: 900,
+    fontFamily: 'monospace',
+    textShadow: '0 0 40px rgba(0,0,0,0.8), 0 4px 24px rgba(0,0,0,0.9)',
+    letterSpacing: '-0.03em',
+    opacity: 0.95,
   },
   viewBtn: {
     background: 'rgba(0,0,0,0.65)',
