@@ -23,7 +23,7 @@ export default function QuizBoard({
   // TODO: 問題文・ヒントテキストのスタイルを実装する
 useEffect(()=>{
   onTimeChange(10);
-  },{currentData,onTimeChange});
+  },[currentData,onTimeChange]);
 useEffect(()=>{
   if (pendingBranch)return;
   if (timeLeft<=0)return;
@@ -55,18 +55,30 @@ useEffect(()=>{
           <p style={{margin:0, color:'#E8F4F0', border:"2px dashed #5DCAA5", padding:'6px', display:'inline-block',
             borderRadius:'15px' }}>ヒントは手を挙げたら表示されます。</p>
         </div>
-
-        <span
-        style={{display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "82px",
-    height: "82px",
-    border: "2px solid orange",
-    borderRadius: "50%",
-    fontWeight: "bold",
-    color:'#E8F4F0',
-    fontSize:"40px"}}>{timeLeft}</span>
+        <>
+          <style>{`
+            @keyframes pop {
+              0% { transform: scale(0.8); }
+              50% { transform: scale(1.2); }
+              100% { transform: scale(1); }
+            }
+          `}</style>
+          <span key={timeLeft}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "82px",
+              height: "82px",
+              border: "2px solid orange",
+              borderRadius: "50%",
+              fontWeight: "bold",
+              color: "#E8F4F0",
+              fontSize: "40px",
+              animation: timeLeft <= 3 ? "pop 0.3s ease" : "none",
+            }}
+          >{timeLeft}</span>
+        </>
       </div>
       {/* <div style={{color:'#E8F4F0', textAlign:'center'}}>ヒント</div> */}
       <div style={{ 
