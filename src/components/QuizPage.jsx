@@ -22,6 +22,7 @@ export default function QuizPage({
   onBatteryDeadComplete,
   timeLeft,
   onTimeChange,
+  onTimeoutFail,
 }) {
 
   return (
@@ -62,6 +63,7 @@ export default function QuizPage({
             hintText={currentData.hint}
             batteryDead={batteryDead}
             onBatteryDeadComplete={onBatteryDeadComplete}
+            onTimeoutFail={onTimeoutFail}
           />
         </div>
 

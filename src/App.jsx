@@ -102,6 +102,12 @@ function App() {
     navigate('/finish');
   };
 
+  // タイムアウトかつ傾きなしの場合：その場で爆発して不正解扱いで /finish へ
+  const handleTimeoutFail = () => {
+    setStatus('failed');
+    setBatteryDead(true);
+  };
+
   const currentNarration = scene === 'finish'
     ? (status === 'success' ? NARRATIONS.finish.success : NARRATIONS.finish.failed)
     : NARRATIONS[scene];
@@ -213,6 +219,7 @@ const handleBranchComplete = () => {
                 onBatteryDeadComplete={handleBatteryDeadComplete}
                 timeLeft={timeLeft}
                 onTimeChange={setTimeLeft}
+                onTimeoutFail={handleTimeoutFail}
               />
             )}
           </>
