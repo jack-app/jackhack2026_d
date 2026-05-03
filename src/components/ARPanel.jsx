@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ARScene from './AR';
 
-export default function ARPanel({ currentData, onAnswer, pendingBranch, correctBranch, onBranchComplete, onUseHint, timeLeft, hintText, batteryDead, onBatteryDeadComplete }) {
+export default function ARPanel({ currentData, onAnswer, pendingBranch, correctBranch, onBranchComplete, onUseHint, timeLeft, hintText, batteryDead, onBatteryDeadComplete, onTimeoutFail }) {
   const navigate = useNavigate();
   const latestVotesRef = useRef({ left: 0, right: 0 });
   const handleVotesChange = useCallback((v) => {
@@ -13,8 +13,13 @@ export default function ARPanel({ currentData, onAnswer, pendingBranch, correctB
   useEffect(() => {
     if (timeLeft === 0) {
       const { left, right } = latestVotesRef.current;
-      const goLeft = left >= right;
-      onAnswer(goLeft ? currentData.choices[0] : currentData.choices[1], navigate);
+      if (left === right) {
+        // どちらにも傾いていない場合はその場で爆発して不正解扱いにする
+        onTimeoutFail?.();
+      } else {
+        const goLeft = left > right;
+        onAnswer(goLeft ? currentData.choices[0] : currentData.choices[1], navigate);
+      }
     }
   }, [timeLeft]);
 

@@ -70,7 +70,7 @@ useEffect(()=>{
               justifyContent: "center",
               width: "82px",
               height: "82px",
-              border: "2px solid orange",
+              border: "5px solid yellow",
               borderRadius: "50%",
               fontWeight: "bold",
               color: "#E8F4F0",
@@ -90,21 +90,23 @@ useEffect(()=>{
         <div
           style={{ flex: 1 ,border: "2px solid #5DCAA5",
                 padding: "20px",
-                background: "transparent",borderRadius: "10px"}}
+                background: "transparent",borderRadius: "10px",
+                display: 'flex', justifyContent: 'center', alignItems: 'center'}}
           onClick={() => onAnswer(currentData.choices[0], navigate)}
           disabled={!!pendingBranch}
         >
-          <span style={{color:'#E8F4F0',paddingLeft:'40%'}}>← {currentData.choices[0]}</span>
+          <span style={{color:'#E8F4F0',fontSize:'2rem'}}>← {currentData.choices[0]}</span>
         </div>
 
         <div
-          style={{ flex: 1, border: "2px solid #E23636",
+          style={{ flex: 1, border: "2px solid #5DCAA5",
       padding: "20px",
-      background: "transparent" ,borderRadius: "10px"}}
+      background: "transparent" ,borderRadius: "10px",
+      display: 'flex', justifyContent: 'center', alignItems: 'center'}}
           onClick={() => onAnswer(currentData.choices[1], navigate)}
           disabled={!!pendingBranch}
         >
-         <span style={{color:'#E8F4F0',paddingLeft:'40%'}}>→ {currentData.choices[1]}</span>
+         <span style={{color:'#E8F4F0',fontSize:'2rem'}}>→ {currentData.choices[1]}</span>
         </div>
       </div>
 
