@@ -18,6 +18,8 @@ export default function QuizPage({
   questionIndex,
   totalQuestions,
   narrationLines,
+  batteryDead,
+  onBatteryDeadComplete,
 }) {
   // QuizBoard（タイマー管理）→ ARPanel（タイムアウト処理）の橋渡し
   const [timeLeft, setTimeLeft] = useState(10);
@@ -58,6 +60,8 @@ export default function QuizPage({
             onUseHint={onUseHint}
             timeLeft={timeLeft}
             hintText={currentData.hint}
+            batteryDead={batteryDead}
+            onBatteryDeadComplete={onBatteryDeadComplete}
           />
         </div>
 
