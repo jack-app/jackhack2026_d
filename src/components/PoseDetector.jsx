@@ -10,7 +10,7 @@ const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/pose_landmark
 // props: onVotes({ left, right }) — 毎フレーム呼ばれる
 // left/right は「画面の左側・右側にいる人数」
 // onHandRaised() — 全員が腕を上げた瞬間に呼ばれる
-export default function PoseDetector({ onVotes, onHandRaised }) {
+export default function PoseDetector({ onVotes, onHandRaised, hintText, disableHint }) {
   // DOM 参照
   const videoRef      = useRef(null);   // カメラ映像を流す <video> 要素
   const canvasRef     = useRef(null);   // 骨格描画用 <canvas> 要素（映像に重ねる）
@@ -24,6 +24,9 @@ export default function PoseDetector({ onVotes, onHandRaised }) {
 
   const onHandRaisedRef = useRef(onHandRaised);
   onHandRaisedRef.current = onHandRaised;
+
+  const disableHintRef = useRef(disableHint);
+  disableHintRef.current = disableHint;
 
   const [status,        setStatus]        = useState('loading'); // 'loading' | 'ready' | 'error'
   const [errorMsg,      setErrorMsg]      = useState(null);
@@ -85,7 +88,10 @@ export default function PoseDetector({ onVotes, onHandRaised }) {
   useEffect(() => {
     if (status !== 'ready') return;
 
+    let isMounted = true;
+
     function detect() {
+      if (!isMounted) return;
       const video  = videoRef.current;
       const canvas = canvasRef.current;
       const lm     = landmarkerRef.current;
@@ -149,7 +155,7 @@ export default function PoseDetector({ onVotes, onHandRaised }) {
         const raised = persons.length > 0 && persons.every(p => p.armsRaised);
 
         setDetections(persons);
-        setAllArmsRaised(raised);
+        setAllArmsRaised(!disableHintRef.current && raised);
 
         // 画面左側・右側にいる人数を集計して親コンポーネントに渡す
         onVotesRef.current?.({
@@ -162,9 +168,23 @@ export default function PoseDetector({ onVotes, onHandRaised }) {
       rafRef.current = requestAnimationFrame(detect);
     }
 
-    rafRef.current = requestAnimationFrame(detect);
+    if (isMounted) { 
+        rafRef.current = requestAnimationFrame(detect);
+      }
     // アンマウント時またはステータス変化時にループを止める
-    return () => cancelAnimationFrame(rafRef.current);
+    return () => {
+      isMounted = false; 
+      cancelAnimationFrame(rafRef.current);
+      
+      try {
+        const stream = videoRef.current?.srcObject;
+        if (stream) {
+          stream.getTracks().forEach(t => t.stop());
+        }
+      } catch (e) {
+        console.warn("カメラ停止エラー (無視してOK):", e);
+      }
+    };
   }, [status]);
 
   return (
@@ -188,10 +208,11 @@ export default function PoseDetector({ onVotes, onHandRaised }) {
         </div>
       )}
 
-      {/* 全員が腕を上げたときにヒント文字をオーバーレイ表示する */}
+      {/* 全員が腕を上げたときにヒントをオーバーレイ表示する */}
       {allArmsRaised && (
         <div style={styles.hintOverlay}>
-          <span style={styles.hintText}>ヒント</span>
+          <span style={styles.hintLabel}>ヒント</span>
+          {hintText && <span style={styles.hintContent}>{hintText}</span>}
         </div>
       )}
 
@@ -200,7 +221,14 @@ export default function PoseDetector({ onVotes, onHandRaised }) {
         <div style={styles.badge}>
           <span style={styles.count}>{detections.length}人</span>
           {detections.map((p, i) => (
-            <span key={i} style={styles.lean}>
+            <span 
+              key={i} 
+              style={{
+                ...styles.lean, 
+                // 💡 左なら #5DCAA5、右なら #E23636 に色を変える
+                color: p.side === 'left' ? '#5DCAA5' : '#E23636' 
+              }}
+            >
               {p.side === 'left' ? '左' : '右'}
             </span>
           ))}
@@ -241,12 +269,20 @@ const styles = {
   lean:  { fontSize: 13, color: '#ccc' },
   hintOverlay: {
     position: 'absolute', inset: 0,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: 'rgba(0,0,0,0.5)',
-    pointerEvents: 'none', // 背面のクリック操作を妨げない
+    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    gap: 16,
+    background: 'rgba(0,0,0,0.6)',
+    pointerEvents: 'none',
   },
-  hintText: {
-    fontSize: 64, fontWeight: 'bold', color: '#fff',
-    textShadow: '0 0 20px rgba(255,255,255,0.8)',
+  hintLabel: {
+    fontSize: 48, fontWeight: 'bold', color: '#5DCAA5',
+    textShadow: '0 0 20px rgba(93, 202, 165, 0.8)',
+    letterSpacing: '0.1em',
+  },
+  hintContent: {
+    fontSize: 28, fontWeight: 'bold', color: '#fff',
+    textShadow: '0 0 16px rgba(255,255,255,0.7)',
+    textAlign: 'center', padding: '0 24px', lineHeight: 1.5,
+    maxWidth: '90%',
   },
 };

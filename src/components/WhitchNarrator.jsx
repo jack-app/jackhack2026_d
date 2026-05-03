@@ -1,4 +1,3 @@
-import { backgroundBlurriness } from "three/tsl";
 import dummy from "../assets/witch.png"
 export default function WhitchNarrator({ lines }) {
   return (
