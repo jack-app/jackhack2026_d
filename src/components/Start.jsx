@@ -40,7 +40,7 @@ export default function Start({ handleStart, narrationLines }) {
           color: '#5DCAA5',
           letterSpacing: '0.05em',
         }}>
-          JackHack 2026 DanDa団
+          jackHack 2026 DanDa団
         </p>
 
         <h1 style={{
