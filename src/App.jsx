@@ -181,7 +181,7 @@ const handleBranchComplete = () => {
     };
   };
   return (
-    <Router>
+    <Router basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={
           <Start handleStart={handleStart} narrationLines={currentNarration} />
