@@ -8,7 +8,10 @@ import Selector from './components/Selector';
 
 const QUESTIONS = [
   { id: 1, text: "電気抵抗の単位は？", choices: ["Ω", "V"], currentDirection: "left", hint: "ギリシャ文字です", difficulty: "easy" },
-  { id: 2, text: "Reactで状態を管理するのは？", choices: ["useState", "useEffect"], currentDirection: "left", hint: "名前の通りです", difficulty: "hard" },
+  { id: 2, text: "水の化学式は？", choices: ["H2O", "CO2"], currentDirection: "left", hint: "水素と酸素でできています", difficulty: "easy" },
+  { id: 3, text: "光の速さに最も近いのは？", choices: ["30万m/s", "30万km/s"], currentDirection: "right", hint: "非常に速いです", difficulty: "easy" },
+  { id: 4, text: "円周率 π の近似値は？", choices: ["2.71", "3.14"], currentDirection: "right", hint: "円の直径と周の比です", difficulty: "easy" },
+  { id: 5, text: "Reactで状態を管理するのは？", choices: ["useState", "useEffect"], currentDirection: "left", hint: "名前の通りです", difficulty: "hard" },
 ];
 
 const NARRATIONS = {
@@ -46,10 +49,11 @@ function App() {
   const [isDifficultySelected, setIsDifficultySelected] = useState(false);
   const [showSelector, setShowSelector] = useState(false);
   const [pendingBranch, setPendingBranch] = useState(null);
-  const pendingNavigateRef = useRef(null);
+  const [correctBranch, setCorrectBranch] = useState(null);
+  const nextActionRef = useRef(null);
 
   const filteredQuestions = QUESTIONS.filter(q => q.difficulty === difficulty);
-  const selectionPoints = [0, 3, QUESTIONS.length - 1];
+  const selectionPoints = [0];
 
   const handleStart = () => {
     setScene('quiz');
@@ -66,6 +70,9 @@ function App() {
     setScene('start');
     setShowSelector(false);
     setIsDifficultySelected(false);
+    setPendingBranch(null);
+    setCorrectBranch(null);
+    nextActionRef.current = null;
   };
 
   const currentNarration = scene === 'finish'
@@ -73,9 +80,9 @@ function App() {
     : NARRATIONS[scene];
 
   const useHint = () => {
-    // TODO: batteryRef.current.get() >= 10 のとき batteryRef.current.decrease(10) を呼ぶ
-    batteryRef.current.decrease(10);
-    // TODO: setIsHintVisible(true) でヒントを表示する
+    if (isHintVisible) return;
+    if (battery >= 10) batteryRef.current?.decrease(10);
+    setIsHintVisible(true);
   };
 
   const selectDifficulty = (level) => {
@@ -83,49 +90,62 @@ function App() {
     setIsDifficultySelected(true);
     setShowSelector(false);
   };
-
-  const handleBranchComplete = () => {
+const handleBranchComplete = () => {
     batteryRef.current?.decrease(5); // トロッコ1周分のエネルギー消費
-    const pending = pendingNavigateRef.current;
-    if (pending) {
-      pending.fn(pending.navigate);
-      pendingNavigateRef.current = null;
+    
+    const action = nextActionRef.current;
+    if (!action) return;
+
+    if (action.isCorrect) {
+      batteryRef.current?.increase(difficulty === 'hard' ? 20 : 5);
+      if (currentIndex < filteredQuestions.length - 1) {
+        // 次の問題へ進む
+        const nextIndex = currentIndex + 1;
+        setCurrentIndex(nextIndex);
+        setIsHintVisible(false);
+        if (selectionPoints.includes(nextIndex)) {
+          setShowSelector(true);
+          setIsDifficultySelected(false);
+        }
+        setPendingBranch(null);
+        setCorrectBranch(null);
+      } else {
+        // 最後の問題をクリアして Finish へ！
+        setStatus('success');
+        setScene('finish');
+        console.log("正解！ Finishに遷移します。");
+        action.navigate('/finish'); 
+      
+      
+        // window.location.href = '/finish';
+      }
+    } else {
+      // 間違えて Finish へ！
+      setStatus('failed');
+      setScene('finish');
+      console.log("不正解。 Finishに遷移します。");
+      action.navigate('/finish');
+
+      // window.location.href = '/finish';
     }
-    setPendingBranch(null);
+
+    nextActionRef.current = null; // メモを使い終わったら空にする
   };
 
+  // 2. 予約（メモ）する側
   const handleAnswer = (choice, navigate) => {
     const branchDir = choice === filteredQuestions[currentIndex].choices[0] ? 'left' : 'right';
     const isCorrect = branchDir === filteredQuestions[currentIndex].currentDirection;
+    
     setPendingBranch(branchDir);
+    setCorrectBranch(filteredQuestions[currentIndex].currentDirection);
 
-    pendingNavigateRef.current = {
-      navigate,
-      fn: (nav) => {
-        if (isCorrect) {
-          batteryRef.current?.increase(difficulty === 'hard' ? 20 : 5);
-          if (currentIndex < filteredQuestions.length - 1) {
-            const nextIndex = currentIndex + 1;
-            setCurrentIndex(prev => prev + 1);
-            setIsHintVisible(false);
-            if (selectionPoints.includes(nextIndex)) {
-              setShowSelector(true);
-              setIsDifficultySelected(false);
-            }
-          } else {
-            setStatus('success');
-            setScene('finish');
-            nav('/finish');
-          }
-        } else {
-          setStatus('failed');
-          setScene('finish');
-          nav('/finish');
-        }
-      },
+    // 💡 ここが超重要！ 関数(fn)を保存するのをやめて、結果だけをメモする！
+    nextActionRef.current = {
+      isCorrect: isCorrect,
+      navigate: navigate
     };
   };
-
   return (
     <Router>
       <Routes>
@@ -142,7 +162,14 @@ function App() {
                 onSelect={selectDifficulty}
                 currentDifficulty={difficulty}
               />
-            ) : (
+            ): scene === 'finish' ? (
+              <div style={{ 
+                width: '100vw', 
+                height: '100vh', 
+                backgroundColor: '#0E1A20' // QuizPage や AR と同じ暗い色にする
+              }} />
+            ) : 
+            (
               <QuizPage
                 battery={battery}
                 batteryRef={batteryRef}
@@ -152,6 +179,7 @@ function App() {
                 onUseHint={useHint}
                 isHintVisible={isHintVisible}
                 pendingBranch={pendingBranch}
+                correctBranch={correctBranch}
                 onBranchComplete={handleBranchComplete}
                 questionIndex={currentIndex + 1}
                 totalQuestions={filteredQuestions.length}

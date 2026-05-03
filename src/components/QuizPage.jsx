@@ -13,6 +13,7 @@ export default function QuizPage({
   onUseHint,
   isHintVisible,
   pendingBranch,
+  correctBranch,
   onBranchComplete,
   questionIndex,
   totalQuestions,
@@ -22,7 +23,7 @@ export default function QuizPage({
   const [timeLeft, setTimeLeft] = useState(10);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', backgroundColor: '#0E1A20' }}>
 
       {/* 上段：問題エリア */}
       <div style={{ flexShrink: 0 ,backgroundColor:'#1A3040'}}>
@@ -52,9 +53,11 @@ export default function QuizPage({
             currentData={currentData}
             onAnswer={onAnswer}
             pendingBranch={pendingBranch}
+            correctBranch={correctBranch}
             onBranchComplete={onBranchComplete}
             onUseHint={onUseHint}
             timeLeft={timeLeft}
+            hintText={currentData.hint}
           />
         </div>
 
