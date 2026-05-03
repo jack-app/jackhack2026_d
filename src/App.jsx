@@ -51,6 +51,7 @@ function App() {
   const [showSelector, setShowSelector] = useState(false);
   const [pendingBranch, setPendingBranch] = useState(null);
   const [correctBranch, setCorrectBranch] = useState(null);
+  const [timeLeft, setTimeLeft]=useState(10);
   const nextActionRef = useRef(null);
 
   const filteredQuestions = QUESTIONS.filter(q => q.difficulty === difficulty);
@@ -75,6 +76,7 @@ function App() {
     setPendingBranch(null);
     setCorrectBranch(null);
     setBatteryDead(false);
+    setTimeLeft(10);
     nextActionRef.current = null;
   };
 
@@ -123,6 +125,7 @@ const handleBranchComplete = () => {
         const nextIndex = currentIndex + 1;
         setCurrentIndex(nextIndex);
         setIsHintVisible(false);
+        setTimeLeft(10);
         if (selectionPoints.includes(nextIndex)) {
           setShowSelector(true);
           setIsDifficultySelected(false);
@@ -203,6 +206,8 @@ const handleBranchComplete = () => {
                 narrationLines={currentNarration}
                 batteryDead={batteryDead}
                 onBatteryDeadComplete={handleBatteryDeadComplete}
+                timeLeft={timeLeft}
+                onTimeChange={setTimeLeft}
               />
             )}
           </>

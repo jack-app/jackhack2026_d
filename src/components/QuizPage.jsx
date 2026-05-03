@@ -20,9 +20,9 @@ export default function QuizPage({
   narrationLines,
   batteryDead,
   onBatteryDeadComplete,
+  timeLeft,
+  onTimeChange,
 }) {
-  // QuizBoard（タイマー管理）→ ARPanel（タイムアウト処理）の橋渡し
-  const [timeLeft, setTimeLeft] = useState(10);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', backgroundColor: '#0E1A20' }}>
@@ -39,7 +39,7 @@ export default function QuizPage({
           battery={battery}
           pendingBranch={pendingBranch}
           timeLeft={timeLeft}
-          onTimeChange={setTimeLeft}
+          onTimeChange={onTimeChange}
         />
       </div>
 
