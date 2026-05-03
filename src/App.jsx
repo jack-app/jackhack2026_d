@@ -14,7 +14,7 @@ const QUESTIONS = [
   { id: 5, text: "jackの現代表は？", choices: ["鉄壁", "磐石"], currentDirection: "left", hint: "英単語帳に関係があるかも？", difficulty: "easy" },
   { id: 6, text: "jackのtwitterのidは？", choices: ["jackapp_tmy", "jack_progrming"], currentDirection: "left", hint: "「アプリ」開発団体であるから…", difficulty: "hard" },
   { id: 7, text: "jackに本当にあるプロダクトは？", choices: ["安心打診おばあ", "乱心慢心おじい"], currentDirection: "left", hint: "jack団体紹介のプレゼンで紹介したはず！", difficulty: "hard" },
-  { id: 8, text: "jackのB1の次に人数が多い学年は？", choices: ["B3", "B2"], currentDirection: "right", hint: "今まであった先輩を考えてみよう", difficulty: "hard" },
+  { id: 8, text: "jackのB1の次に人数が多い学年は？", choices: ["B2", "B3"], currentDirection: "right", hint: "今まであった先輩を考えてみよう", difficulty: "hard" },
   { id: 9, text: "jackのtwitterの投稿数は？", choices: ["334", "1334"], currentDirection: "left", hint: "Twitterは11周年！", difficulty: "hard" },
   { id: 10, text: "jackの設立日は？", choices: ["10月3日", "11月3日"], currentDirection: "right", hint: "秋の中旬！", difficulty: "hard" },
 ];
