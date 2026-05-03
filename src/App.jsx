@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate} from 'react-router-dom';
 import Start from './components/Start';
 import QuizPage from './components/QuizPage';
@@ -40,6 +40,7 @@ function App() {
   // 書き込みは batteryRef.current.increase / decrease / reset を使う
   const [battery, setBattery] = useState(100);
   const batteryRef = useRef(null);
+  const [batteryDead, setBatteryDead] = useState(false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [difficulty, setDifficulty] = useState('easy');
@@ -65,6 +66,7 @@ function App() {
 
   const resetGame = () => {
     batteryRef.current?.reset();
+    setBattery(100); // /finish 画面では BatteryMeter がアンマウントされ batteryRef が null のため直接リセット
     setCurrentIndex(0);
     setIsHintVisible(false);
     setScene('start');
@@ -72,7 +74,25 @@ function App() {
     setIsDifficultySelected(false);
     setPendingBranch(null);
     setCorrectBranch(null);
+    setBatteryDead(false);
     nextActionRef.current = null;
+  };
+
+  // battery が 0 以下になったら即座に失敗扱いにする
+  // isDifficultySelected が true のとき（ゲームが進行中）だけ発火させる
+  // → resetGame 後は isDifficultySelected=false なので再発火しない
+  useEffect(() => {
+    if (battery <= 0 && isDifficultySelected && scene !== 'finish' && !batteryDead) {
+      setBatteryDead(true);
+      setStatus('failed');
+    }
+  }, [battery, isDifficultySelected, scene, batteryDead]);
+
+  // 爆発アニメーション完了後に /finish へ遷移するコールバック
+  const handleBatteryDeadComplete = (navigate) => {
+    setScene('finish');
+    setBatteryDead(false);
+    navigate('/finish');
   };
 
   const currentNarration = scene === 'finish'
@@ -81,7 +101,7 @@ function App() {
 
   const useHint = () => {
     if (isHintVisible) return;
-    if (battery >= 10) batteryRef.current?.decrease(10);
+    batteryRef.current?.decrease(30);
     setIsHintVisible(true);
   };
 
@@ -97,7 +117,7 @@ const handleBranchComplete = () => {
     if (!action) return;
 
     if (action.isCorrect) {
-      batteryRef.current?.increase(difficulty === 'hard' ? 20 : 5);
+      batteryRef.current?.increase(difficulty === 'hard' ? 10 : 5);
       if (currentIndex < filteredQuestions.length - 1) {
         // 次の問題へ進む
         const nextIndex = currentIndex + 1;
@@ -184,6 +204,8 @@ const handleBranchComplete = () => {
                 questionIndex={currentIndex + 1}
                 totalQuestions={filteredQuestions.length}
                 narrationLines={currentNarration}
+                batteryDead={batteryDead}
+                onBatteryDeadComplete={handleBatteryDeadComplete}
               />
             )}
           </>

@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ARScene from './AR';
 
-export default function ARPanel({ currentData, onAnswer, pendingBranch, correctBranch, onBranchComplete, onUseHint, timeLeft, hintText }) {
+export default function ARPanel({ currentData, onAnswer, pendingBranch, correctBranch, onBranchComplete, onUseHint, timeLeft, hintText, batteryDead, onBatteryDeadComplete }) {
   const navigate = useNavigate();
   const latestVotesRef = useRef({ left: 0, right: 0 });
   const [timeoutLabel, setTimeoutLabel] = useState(null);
@@ -26,6 +26,10 @@ export default function ARPanel({ currentData, onAnswer, pendingBranch, correctB
     if (!pendingBranch) setTimeoutLabel(null);
   }, [pendingBranch]);
 
+  const handleBatteryDeadComplete = useCallback(() => {
+    onBatteryDeadComplete?.(navigate);
+  }, [navigate, onBatteryDeadComplete]);
+
   return (
     <ARScene
       pendingBranch={pendingBranch}
@@ -35,6 +39,8 @@ export default function ARPanel({ currentData, onAnswer, pendingBranch, correctB
       timeoutLabel={timeoutLabel}
       hintText={hintText}
       correctBranch={correctBranch}
+      batteryDead={batteryDead}
+      onBatteryDeadComplete={handleBatteryDeadComplete}
     />
   );
 }

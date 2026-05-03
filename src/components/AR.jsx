@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import PoseDetector from './PoseDetector';
 import rengaTexture from '../assets/texture/renga.jpg';
+import bakuhatuVideo from '../assets/bakuhatu.mp4';
 
 const lerp = (a, b, t) => a + (b - a) * t;
 
@@ -592,10 +593,11 @@ function TimberFrames() {
 }
 
 // ─── プレイ画面 ──────────────────────────────────────────
-export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, onHandRaised, onVotesChange, timeoutLabel, hintText, correctBranch }) {
+export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, onHandRaised, onVotesChange, timeoutLabel, hintText, correctBranch, batteryDead, onBatteryDeadComplete }) {
   const votesRef           = useRef({ left: 0, right: 0 });
   const tiltRef            = useRef(0);
   const videoPanelRef      = useRef(null);
+  const explosionVideoRef   = useRef(null);
   const animRef            = useRef(null);
   const cartPosRef         = useRef({ x: 0, z: PATH_PARAMS.INITIAL_Z, rotY: 0 });
   const branchAnimRef      = useRef(null);
@@ -605,6 +607,43 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
   const [branching, setBranching]       = useState(false);
   const [resultVisible, setResultVisible] = useState(false);
   const resultVisibleRef = useRef(false);
+  const isCorrectRef = useRef(null);
+  const [batteryDeadExplosion, setBatteryDeadExplosion] = useState(false);
+
+  useEffect(() => {
+    isCorrectRef.current = pendingBranch != null && correctBranch != null ? pendingBranch === correctBranch : null;
+  }, [pendingBranch, correctBranch]);
+
+  // battery が 0 以下になったら即座に爆発させて /finish へ遷移する（テキストなし）
+  useEffect(() => {
+    if (!batteryDead) return;
+    branchAnimRef.current = null;
+    setBranching(false);
+    isCorrectRef.current = false;
+    setBatteryDeadExplosion(true);
+    resultVisibleRef.current = true;
+    setResultVisible(true);
+    const timer = setTimeout(() => {
+      onBatteryDeadComplete?.();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [batteryDead]);
+
+  useEffect(() => {
+    const videoElem = explosionVideoRef.current;
+    if (!videoElem) return;
+
+    if (resultVisible && isCorrectRef.current === false) {
+      // 不正解のときだけ表示して再生
+      videoElem.style.display = 'block';
+      videoElem.play().catch(err => console.error("爆発ビデオ再生エラー:", err));
+    } else {
+      // それ以外（正解、または結果非表示中）は隠して停止、頭に戻す
+      videoElem.style.display = 'none';
+      videoElem.pause();
+      videoElem.currentTime = 0;
+    }
+  }, [resultVisible]);
 
   const toggleView = useCallback(() => setViewMode((prev) => (prev === 'normal' ? 'top' : 'normal')), []);
 
@@ -647,23 +686,27 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
           const pos = getCartPoint(anim.direction, 'branch', t);
           const tan = getCartTangent(anim.direction, 'branch', t);
           cartPosRef.current = { x: pos.x, z: pos.z, rotY: Math.atan2(-tan.x, -tan.z) };
+          
           if (t >= 1 && !resultVisibleRef.current) {
-            branchAnimRef.current = { phase: 'return-arc', startTime: Date.now(), direction: anim.direction };
             resultVisibleRef.current = true;
             setResultVisible(true);
+
+            // 【変更】正解・不正解にかかわらずアニメーションを続行する（スキップしない）
+            branchAnimRef.current = { phase: 'return-arc', startTime: Date.now(), direction: anim.direction };
           }
         } else if (anim.phase === 'return-arc') {
           const t = Math.min(elapsed / RETURN_ARC_DURATION, 1);
           const pos = getCartPoint(anim.direction, 'return-arc', t);
           const tan = getCartTangent(anim.direction, 'return-arc', t);
           cartPosRef.current = { x: pos.x, z: pos.z, rotY: Math.atan2(-tan.x, -tan.z) };
+          
           if (t >= 1) {
             let startRotY = Math.atan2(-tan.x, -tan.z);
             while (startRotY > Math.PI) startRotY -= 2 * Math.PI;
             while (startRotY <= -Math.PI) startRotY += 2 * Math.PI;
             branchAnimRef.current = { phase: 'return-straight', startTime: Date.now(), startRotY };
-            resultVisibleRef.current = false;
-            setResultVisible(false);
+            
+            // 【変更】ここではまだ「不正解/正解」を消さない（表示を維持する）
           }
         } else if (anim.phase === 'return-straight') {
           const t = Math.min(elapsed / RETURN_STRAIGHT_DURATION, 1);
@@ -672,10 +715,15 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
           const z = startZ - (startZ - initialZ) * t; 
           const rotY = anim.startRotY * (1 - t); 
           cartPosRef.current = { x: 0, z, rotY };
+          
           if (t >= 1) {
             cartPosRef.current = { x: 0, z: initialZ, rotY: 0 };
             branchAnimRef.current = null;
             setBranching(false);
+            
+            // 【変更】return-straight のアニメーションが完了したタイミングで結果を消し、遷移させる
+            resultVisibleRef.current = false;
+            setResultVisible(false);
             onBranchCompleteRef.current?.();
           }
         }
@@ -698,8 +746,8 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
   const leftPct = total > 0 ? Math.round((votesDisplay.left / total) * 100) : 50;
 
   const isCorrect   = pendingBranch != null && correctBranch != null ? pendingBranch === correctBranch : null;
-  const resultText  = isCorrect ? '正解！' : '不正解...';
-  const resultColor = isCorrect ? '#22c55e' : '#ef4444';
+  const resultText  = isCorrect ? '正解' : '不正解';
+  const resultColor = isCorrect ? '#5DCAA5' : '#E23636';
 
   return (
     <div style={styles.root}>
@@ -730,6 +778,14 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
 
       <div ref={videoPanelRef} style={{ ...styles.videoPanel, visibility: viewMode === 'top' ? 'hidden' : 'visible' }}>
         <PoseDetector onVotes={handleVotes} onHandRaised={onHandRaised} hintText={hintText} disableHint={pendingBranch != null}/>
+        <video
+          ref={explosionVideoRef}
+          src={bakuhatuVideo}
+          style={styles.explosionVideo}
+          muted // 自動再生のためにmuted推奨、音が必要ならuseEffectでunmute
+          playsInline
+          loop
+        />
       </div>
 
       {timeoutLabel && (
@@ -738,7 +794,7 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
         </div>
       )}
 
-      {resultVisible && (
+      {resultVisible && !batteryDeadExplosion && (
         <div style={styles.resultOverlay}>
           <span style={{ ...styles.resultText, color: resultColor }}>{resultText}</span>
         </div>
@@ -765,6 +821,17 @@ const styles = {
   root: { position: 'relative', height: '100vh', background: '#0d0d1a', overflow: 'hidden' },
   canvasWrap: { position: 'absolute', inset: 0 },
   videoPanel: { position: 'absolute', bottom: '30%', left: '50%', transform: 'translateX(-50%)', height: '55%', aspectRatio: '15/9', overflow: 'hidden', borderRadius: 6, zIndex: 10 },
+  explosionVideo: {
+    position: 'absolute',
+    inset: 0, // 親（videoPanel）いっぱいに広げる
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover', // 画面に合わせてトリミング
+    zIndex: 20, // PoseDetectorより上に表示
+    display: 'none', // 初期は非表示
+    pointerEvents: 'none', // ビデオへのクリック等を無効化
+    mixBlendMode: 'screen',
+  },
   overlay: { position: 'absolute', top: 12, right: 12, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, zIndex: 100 },
   voteBadge: { display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,0,0,0.65)', borderRadius: 20, padding: '8px 14px', minWidth: 220, backdropFilter: 'blur(4px)' },
   sideLabel: { fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', fontFamily: 'monospace' },
