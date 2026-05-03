@@ -402,12 +402,23 @@ function BrickWalls() {
     return m;
   }, [texture]);
 
+  // 天井用のマテリアル（空間全体を覆うためリピート数を増やす）
+  const matCeiling = useMemo(() => {
+    if (!texture) return null;
+    const m = new THREE.MeshStandardMaterial({ map: texture.clone(), color: '#ffffff', roughness: 0.8 });
+    m.map.repeat.set(12, 14); 
+    m.map.needsUpdate = true;
+    return m;
+  }, [texture]);
+
   const H = 13.5; 
   const Y = TRACK_Y + H / 2;
 
-  if (!matIsland) {
+  if (!matIsland || !matCeiling) {
     return (
       <group>
+        {/* ローディング中のダミー */}
+        <mesh position={[0, TRACK_Y + H + 0.5, -25]}><boxGeometry args={[64, 1, 72]} /><meshStandardMaterial color="#888888" /></mesh>
         <mesh position={[-10.5, Y, -25]}><boxGeometry args={[10, H, 38]} /><meshStandardMaterial color="#888888" /></mesh>
         <mesh position={[10.5, Y, -25]}><boxGeometry args={[10, H, 38]} /><meshStandardMaterial color="#888888" /></mesh>
       </group>
@@ -416,6 +427,11 @@ function BrickWalls() {
 
   return (
     <group>
+      {/* 天井部分（全体を覆う巨大な板） */}
+      <mesh position={[0, TRACK_Y + H + 0.5, -25]} material={matCeiling}>
+        <boxGeometry args={[64, 1, 72]} />
+      </mesh>
+
       <mesh position={[-10.5, Y, -25]} material={matIsland}><boxGeometry args={[10, H, 38]} /></mesh>
       <mesh position={[10.5, Y, -25]} material={matIsland}><boxGeometry args={[10, H, 38]} /></mesh>
 
@@ -459,6 +475,10 @@ const TimberPanel = ({ p1, p2, height, mat }) => {
   const braceLen = Math.sqrt(L*L + height*height);
   const braceAng = Math.atan2(L, height);
 
+  // 天井を支える張り出し梁（トンネル中央に向かって伸びる梁）
+  const overhang = 3.5;
+  const slantLen = Math.sqrt(overhang*overhang + overhang*overhang);
+
   return (
     <group position={[gx, TRACK_Y, gz]} rotation={[0, ang, 0]}>
       {/* 左右の柱 */}
@@ -473,6 +493,14 @@ const TimberPanel = ({ p1, p2, height, mat }) => {
       {/* Xブレース */}
       <mesh position={[0, height/2, 0]} rotation={[braceAng, 0, 0]} material={mat}><boxGeometry args={[thick*0.8, braceLen, thick*0.8]} /></mesh>
       <mesh position={[0, height/2, 0]} rotation={[-braceAng, 0, 0]} material={mat}><boxGeometry args={[thick*0.8, braceLen, thick*0.8]} /></mesh>
+
+      {/* 天井を支える梁（内側へ張り出す） */}
+      <mesh position={[overhang/2, height - thick/2, -L/2]} material={mat}><boxGeometry args={[overhang, thick, thick]} /></mesh>
+      <mesh position={[overhang/2, height - thick/2, L/2]} material={mat}><boxGeometry args={[overhang, thick, thick]} /></mesh>
+
+      {/* 張り出し梁の斜め支柱（ブラケット補強） */}
+      <mesh position={[overhang/2 - 0.2, height - overhang/2 - 0.2, -L/2]} rotation={[0, 0, Math.PI/4]} material={mat}><boxGeometry args={[thick*0.8, slantLen, thick*0.8]} /></mesh>
+      <mesh position={[overhang/2 - 0.2, height - overhang/2 - 0.2, L/2]} rotation={[0, 0, Math.PI/4]} material={mat}><boxGeometry args={[thick*0.8, slantLen, thick*0.8]} /></mesh>
     </group>
   );
 };
