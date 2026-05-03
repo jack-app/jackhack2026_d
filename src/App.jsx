@@ -170,10 +170,7 @@ const handleBranchComplete = () => {
     <Router>
       <Routes>
         <Route path="/" element={
-          <>
-            <Start handleStart={handleStart}/>
-            <WhitchNarrator lines={currentNarration} />
-          </>
+          <Start handleStart={handleStart} narrationLines={currentNarration} />
         } />
         <Route path="/quiz" element={
           <>
