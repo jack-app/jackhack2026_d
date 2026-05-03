@@ -7,11 +7,16 @@ import WhitchNarrator from './components/WhitchNarrator';
 import Selector from './components/Selector';
 
 const QUESTIONS = [
-  { id: 1, text: "電気抵抗の単位は？", choices: ["Ω", "V"], currentDirection: "left", hint: "ギリシャ文字です", difficulty: "easy" },
-  { id: 2, text: "水の化学式は？", choices: ["H2O", "CO2"], currentDirection: "left", hint: "水素と酸素でできています", difficulty: "easy" },
-  { id: 3, text: "光の速さに最も近いのは？", choices: ["30万m/s", "30万km/s"], currentDirection: "right", hint: "非常に速いです", difficulty: "easy" },
-  { id: 4, text: "円周率 π の近似値は？", choices: ["2.71", "3.14"], currentDirection: "right", hint: "円の直径と周の比です", difficulty: "easy" },
-  { id: 5, text: "Reactで状態を管理するのは？", choices: ["useState", "useEffect"], currentDirection: "left", hint: "名前の通りです", difficulty: "hard" },
+  { id: 1, text: "jackの対面活動日は？", choices: ["隔週水曜or金曜", "隔週火曜or金曜"], currentDirection: "left", hint: "jack団体紹介で書いてあるはず！", difficulty: "easy" },
+  { id: 2, text: "jackで一番参加人数が多いイベントは？", choices: ["jackHack", "jackfes"], currentDirection: "left", hint: "1年の初めがアクティブが一番多いよね", difficulty: "easy" },
+  { id: 3, text: "jackのメンバーは何人？", choices: ["172", "150"], currentDirection: "left", hint: "slackのgeneralの人数に注目！", difficulty: "easy" },
+  { id: 4, text: "jackは今年で何周年？", choices: ["10", "11"], currentDirection: "right", hint: "jackのtwitterの開始日に注目！", difficulty: "easy" },
+  { id: 5, text: "jackの現代表は？", choices: ["鉄壁", "磐石"], currentDirection: "left", hint: "英単語帳に関係があるかも？", difficulty: "easy" },
+  { id: 6, text: "jackのtwitterのidは？", choices: ["jackapp_tmy", "jack_progrming"], currentDirection: "left", hint: "「アプリ」開発団体であるから…", difficulty: "hard" },
+  { id: 7, text: "jackに本当にあるプロダクトは？", choices: ["安心打診おばあ", "乱心慢心おじい"], currentDirection: "left", hint: "jack団体紹介のプレゼンで紹介したはず！", difficulty: "hard" },
+  { id: 8, text: "jackのB1の次に人数が多い学年は？", choices: ["B3", "B2"], currentDirection: "right", hint: "今まであった先輩を考えてみよう", difficulty: "hard" },
+  { id: 9, text: "jackのtwitterの投稿数は？", choices: ["334", "1334"], currentDirection: "left", hint: "Twitterは11周年！", difficulty: "hard" },
+  { id: 10, text: "jackの設立日は？", choices: ["10月3日", "11月3日"], currentDirection: "right", hint: "秋の中旬！", difficulty: "hard" },
 ];
 
 const NARRATIONS = {

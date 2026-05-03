@@ -815,9 +815,9 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
           </div>
           <span style={{ ...styles.sideLabel, color: '#E23636' }}>{votesDisplay.right}人 ➡</span>
         </div>
-        <button onClick={toggleView} style={styles.viewBtn}>
+        {/* <button onClick={toggleView} style={styles.viewBtn}>
           {viewMode === 'normal' ? '▲ Top View' : '▼ Normal View'}
-        </button>
+        </button> */}
       </div>
     </div>
   );
