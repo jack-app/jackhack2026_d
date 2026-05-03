@@ -8,7 +8,7 @@ import Selector from './components/Selector';
 
 const QUESTIONS = [
   { id: 1, text: "jackの対面活動日は？", choices: ["隔週水曜or金曜", "隔週火曜or金曜"], currentDirection: "left", hint: "jack団体紹介で書いてあるはず！", difficulty: "easy" },
-  { id: 2, text: "jackで一番参加人数が多いイベントは？", choices: ["jackHack", "jackfes"], currentDirection: "left", hint: "1年の初めがアクティブが一番多いよね", difficulty: "easy" },
+  { id: 2, text: "jackの正式名称は？", choices: ["アプリ開発団体jack", "アプリ開発団体Jack"], currentDirection: "left", hint: "大文字か、小文字か", difficulty: "easy" },
   { id: 3, text: "jackのメンバーは何人？", choices: ["172", "150"], currentDirection: "left", hint: "slackのgeneralの人数に注目！", difficulty: "easy" },
   { id: 4, text: "jackは今年で何周年？", choices: ["10", "11"], currentDirection: "right", hint: "jackのtwitterの開始日に注目！", difficulty: "easy" },
   { id: 5, text: "jackの現代表は？", choices: ["鉄壁", "磐石"], currentDirection: "left", hint: "英単語帳に関係があるかも？", difficulty: "easy" },
