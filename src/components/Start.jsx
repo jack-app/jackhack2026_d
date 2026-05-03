@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
+import WhitchNarrator from './WhitchNarrator';
 
-export default function Start({ handleStart }) {
+export default function Start({ handleStart, narrationLines }) {
   const navigate = useNavigate();
 
   return (
@@ -14,6 +15,17 @@ export default function Start({ handleStart }) {
       position: 'relative',
       overflow: 'hidden',
     }}>
+      <div style={{
+        position: 'absolute',
+        top: '-10%',
+        left: '7%',
+        width: '18%',
+        height: '100%',
+      }}>
+        <WhitchNarrator lines={narrationLines} />
+      </div>
+
+      {/* 中央コンテンツ */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -74,6 +86,7 @@ export default function Start({ handleStart }) {
         </button>
       </div>
 
+      {/* 下部レール */}
       <div style={{
         width: '100%',
         height: 6,
