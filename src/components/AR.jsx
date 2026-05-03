@@ -593,7 +593,7 @@ function TimberFrames() {
 }
 
 // ─── プレイ画面 ──────────────────────────────────────────
-export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, onHandRaised, onVotesChange, timeoutLabel, hintText, correctBranch, batteryDead, onBatteryDeadComplete }) {
+export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, onHandRaised, onVotesChange, hintText, correctBranch, batteryDead, onBatteryDeadComplete }) {
   const votesRef           = useRef({ left: 0, right: 0 });
   const tiltRef            = useRef(0);
   const videoPanelRef      = useRef(null);
@@ -782,17 +782,23 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
           ref={explosionVideoRef}
           src={bakuhatuVideo}
           style={styles.explosionVideo}
-          muted // 自動再生のためにmuted推奨、音が必要ならuseEffectでunmute
+          muted
           playsInline
           loop
         />
+        {/* 投票中（トロッコ未発車）のみ現在の多数決方向を表示 */}
+        {pendingBranch === null && total > 0 && (() => {
+          const goLeft = votesDisplay.left >= votesDisplay.right;
+          const tied   = votesDisplay.left === votesDisplay.right;
+          const label  = tied ? '← →' : goLeft ? '←' : '→';
+          const color  = tied ? '#fbbf24' : goLeft ? '#5DCAA5' : '#E23636';
+          return (
+            <div style={styles.voteDirectionOverlay}>
+              <span style={{ ...styles.voteDirectionText, color }}>{label}</span>
+            </div>
+          );
+        })()}
       </div>
-
-      {timeoutLabel && (
-        <div style={styles.timeoutOverlay}>
-          <span style={styles.timeoutText}>{timeoutLabel}</span>
-        </div>
-      )}
 
       {resultVisible && !batteryDeadExplosion && (
         <div style={styles.resultOverlay}>
@@ -820,7 +826,7 @@ export default function DevTrolleyPlayScreen({ pendingBranch, onBranchComplete, 
 const styles = {
   root: { position: 'relative', height: '100vh', background: '#0d0d1a', overflow: 'hidden' },
   canvasWrap: { position: 'absolute', inset: 0 },
-  videoPanel: { position: 'absolute', bottom: '30%', left: '50%', transform: 'translateX(-50%)', height: '55%', aspectRatio: '15/9', overflow: 'hidden', borderRadius: 6, zIndex: 10 },
+  videoPanel: { position: 'absolute', bottom: '40%', left: '50%', transform: 'translateX(-50%)', height: '55%', aspectRatio: '15/9', overflow: 'hidden', borderRadius: 6, zIndex: 10 },
   explosionVideo: {
     position: 'absolute',
     inset: 0, // 親（videoPanel）いっぱいに広げる
@@ -837,9 +843,9 @@ const styles = {
   sideLabel: { fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', fontFamily: 'monospace' },
   barWrap: { flex: 1, height: 8, borderRadius: 4, overflow: 'hidden', display: 'flex', background: 'rgba(255,255,255,0.15)' },
   barFill: { height: '100%', transition: 'width 0.3s ease' },
-  timeoutOverlay: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, pointerEvents: 'none' },
-  timeoutText: { fontSize: 120, fontWeight: 900, fontFamily: 'monospace', color: '#fbbf24', textShadow: '0 0 40px rgba(251,191,36,0.9), 0 4px 24px rgba(0,0,0,0.9)', letterSpacing: '-0.05em', opacity: 0.92 },
   resultOverlay: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 150, pointerEvents: 'none' },
   resultText: { fontSize: 96, fontWeight: 900, fontFamily: 'monospace', textShadow: '0 0 40px rgba(0,0,0,0.8), 0 4px 24px rgba(0,0,0,0.9)', letterSpacing: '-0.03em', opacity: 0.95 },
   viewBtn: { background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: 12, color: '#e2e8f0', fontSize: 12, fontWeight: 700, padding: '7px 14px', cursor: 'pointer', backdropFilter: 'blur(4px)', fontFamily: 'monospace', letterSpacing: '0.03em' },
+  voteDirectionOverlay: { position: 'absolute', top: 30, left: 0, right: 0, display: 'flex', justifyContent: 'center', pointerEvents: 'none', zIndex: 30 },
+  voteDirectionText: { fontSize: 52, fontWeight: 900, fontFamily: 'monospace', textShadow: '0 0 20px rgba(0,0,0,0.9), 0 2px 12px rgba(0,0,0,0.8)', letterSpacing: '0.05em' },
 };
