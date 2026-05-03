@@ -46,8 +46,8 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent:'center', gap: 8, containerType:"inline-size", width: '100%', height: '100%', backgroundColor:"#0E1A20" }}>
-      <p style={{ color:`${themeColor}`, fontFamily:"Noto Sans JP", fontWeight:"bold", fontSize:"1.3em", userSelect:'none' }}>Battery</p>
-      <div className="whole_battery" style={{  position: 'relative', width: '36%', aspectRatio: "1/3" }}>
+      <p style={{ color:`${themeColor}`, fontFamily:"Noto Sans JP", fontWeight:"bold", fontSize:"1.3rem", userSelect:'none', margin:'0.5rem 0' }}>Battery</p>
+      <div className="whole_battery" style={{  position: 'relative', width: '36%', aspectRatio: "1/3", margin:'10% 0 5% 0', zIndex:'1' }}>
         <div className="battery_tip" style={{
           position: 'absolute',
           top: '-5%',
@@ -81,7 +81,15 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
             
             }}/>
         </div>
-        <div className="recovery_effect_wrapper" style={{ position:'absolute', top:'0', left:'0', height:'100%', width:'100%', opacity: isRecovering ? 1 : 0, transition:'opacity 0.3s'}} >
+        <div className="recovery_effect_wrapper" style={{
+          position:'absolute',
+          top:'0',
+          left:'0',
+          height:'100%',
+          width:'100%',
+          opacity: isRecovering ? 1 : 0,
+          transition:'opacity 0.3s'
+        }} >
           <SingleRecoveryEffect translate={['380%', '-200%']}/>
           <SingleRecoveryEffect translate={['-150%', '-100%']}/>
           <SingleRecoveryEffect translate={['440%', '0%']}/>
