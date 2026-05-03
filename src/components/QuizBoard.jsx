@@ -42,12 +42,13 @@ useEffect(()=>{
         style={{display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    width: "48px",
-    height: "48px",
+    width: "60px",
+    height: "60px",
     border: "2px solid #5DCAA5",
     borderRadius: "50%",
     fontWeight: "bold",
-    color:'#E8F4F0'}}>{questionIndex}/{totalQuestions}</span>
+    color:'#E8F4F0',
+    fontSize:'25px'}}>{questionIndex}/{totalQuestions}</span>
 
         <div style={{ flex: 1 ,marginRight:"60px"}}>
           <p style={{ margin: 0 , fontSize: "30px",color:'#E8F4F0'}}>{currentData.text}</p>
@@ -55,34 +56,12 @@ useEffect(()=>{
           <p style={{margin:0, color:'#E8F4F0', border:"2px dashed #5DCAA5", padding:'6px', display:'inline-block',
             borderRadius:'15px' }}>ヒントは手を挙げたら表示されます。</p>
         </div>
-        <>
-          <style>{`
-            @keyframes pop {
-              0% { transform: scale(0.8); }
-              50% { transform: scale(1.2); }
-              100% { transform: scale(1); }
-            }
-          `}</style>
-          <span key={timeLeft}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "82px",
-              height: "82px",
-              border: "5px solid yellow",
-              borderRadius: "50%",
-              fontWeight: "bold",
-              color: "#E8F4F0",
-              fontSize: "40px",
-              animation: timeLeft <= 3 ? "pop 0.3s ease" : "none",
-            }}
-          >{timeLeft}</span>
-        </>
+        
       </div>
       {/* <div style={{color:'#E8F4F0', textAlign:'center'}}>ヒント</div> */}
       <div style={{ 
         display: 'flex',
+        alignItems: 'center',
         gap: 50,
         justifyContent:'space-between',
         padding:'0 100px',
@@ -97,12 +76,36 @@ useEffect(()=>{
         >
           <span style={{color:'#E8F4F0',fontSize:'2rem'}}>← {currentData.choices[0]}</span>
         </div>
+         <style>
+        {`
+              @keyframes pop {
+              0% { transform: scale(0.8); }
+              50% { transform: scale(1.2); }
+              100% { transform: scale(1); }
+              }
+      `}
+  </style>
 
+        <span key={timeLeft}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "82px",
+            height: "82px",
+            border: "5px solid yellow",
+            borderRadius: "50%",
+            fontWeight: "bold",
+            color: "#E8F4F0",
+            fontSize: "40px",
+            animation: timeLeft <= 3 ? "pop 0.3s ease" : "none",
+          }}
+        >{timeLeft}</span>
         <div
           style={{ flex: 1, border: "2px solid #5DCAA5",
-      padding: "20px",
-      background: "transparent" ,borderRadius: "10px",
-      display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                padding: "20px",
+                background: "transparent" ,borderRadius: "10px",
+                display: 'flex', justifyContent: 'center', alignItems: 'center'}}
           onClick={() => onAnswer(currentData.choices[1], navigate)}
           disabled={!!pendingBranch}
         >
