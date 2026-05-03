@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-
+import { useEffect } from 'react';
 export default function QuizBoard({
   questionIndex,
   totalQuestions,
@@ -21,7 +21,19 @@ export default function QuizBoard({
   // TODO: 選択肢ボタンのホバー・押下スタイルを実装する
   // TODO: ヒントボタンの disabled スタイルを実装する
   // TODO: 問題文・ヒントテキストのスタイルを実装する
+useEffect(()=>{
+  onTimeChange(10);
+  },{currentData,onTimeChange});
+useEffect(()=>{
+  if (pendingBranch)return;
+  if (timeLeft<=0)return;
 
+  const interval = setInterval(()=>{
+    onTimeChange(prev=>prev-1);
+  },1000);
+
+  return()=>clearInterval(interval);
+  }, [timeLeft, pendingBranch, onTimeChange]);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 12 }}>
 
@@ -37,7 +49,7 @@ export default function QuizBoard({
     fontWeight: "bold",
     color:'#E8F4F0'}}>{questionIndex}/{totalQuestions}</span>
 
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1 ,marginRight:"60px"}}>
           <p style={{ margin: 0 , fontSize: "30px",color:'#E8F4F0'}}>{currentData.text}</p>
           {/* {isHintVisible && <p style={{ margin: 0,color:'#E8F4F0' }}>{currentData.hint}</p>} */}
           <p style={{margin:0, color:'#E8F4F0', border:"2px dashed #5DCAA5", padding:'6px', display:'inline-block',
@@ -48,12 +60,13 @@ export default function QuizBoard({
         style={{display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    width: "48px",
-    height: "48px",
-    border: "2px solid red",
+    width: "82px",
+    height: "82px",
+    border: "2px solid orange",
     borderRadius: "50%",
     fontWeight: "bold",
-    color:'#E8F4F0'}}>{timeLeft}</span>
+    color:'#E8F4F0',
+    fontSize:"40px"}}>{timeLeft}</span>
       </div>
       {/* <div style={{color:'#E8F4F0', textAlign:'center'}}>ヒント</div> */}
       <div style={{ 
@@ -73,7 +86,7 @@ export default function QuizBoard({
         </div>
 
         <div
-          style={{ flex: 1, border: "2px solid #5DCAA5",
+          style={{ flex: 1, border: "2px solid #E23636",
       padding: "20px",
       background: "transparent" ,borderRadius: "10px"}}
           onClick={() => onAnswer(currentData.choices[1], navigate)}
