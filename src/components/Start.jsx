@@ -51,6 +51,8 @@ export default function Start({ handleStart, narrationLines }) {
           textAlign: 'center',
           lineHeight: 1.2,
           letterSpacing: '-0.01em',
+          position: 'relative',
+          left: '20px',
         }}>
           右か、左か、<br />爆発か。
         </h1>
@@ -82,7 +84,7 @@ export default function Start({ handleStart, narrationLines }) {
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}
           onClick={() => { handleStart(); navigate('/quiz'); }}
         >
-          ゲームスタート
+          出発！
         </button>
       </div>
 
