@@ -209,10 +209,10 @@ export default function PoseDetector({ onVotes, onHandRaised, hintText, disableH
       )}
 
       {/* 全員が腕を上げたときにヒントをオーバーレイ表示する */}
-      {/* TODO: hintText などの prop を受け取り、ここにヒント内容を表示する */}
       {allArmsRaised && (
         <div style={styles.hintOverlay}>
-          <span style={styles.hintText}>ヒント</span>
+          <span style={styles.hintLabel}>ヒント</span>
+          {hintText && <span style={styles.hintContent}>{hintText}</span>}
         </div>
       )}
 
@@ -269,12 +269,20 @@ const styles = {
   lean:  { fontSize: 13, color: '#ccc' },
   hintOverlay: {
     position: 'absolute', inset: 0,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: 'rgba(0,0,0,0.5)',
-    pointerEvents: 'none', // 背面のクリック操作を妨げない
+    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    gap: 16,
+    background: 'rgba(0,0,0,0.6)',
+    pointerEvents: 'none',
   },
-  hintText: {
-    fontSize: 64, fontWeight: 'bold', color: '#fff',
-    textShadow: '0 0 20px rgba(255,255,255,0.8)',
+  hintLabel: {
+    fontSize: 48, fontWeight: 'bold', color: '#5DCAA5',
+    textShadow: '0 0 20px rgba(93, 202, 165, 0.8)',
+    letterSpacing: '0.1em',
+  },
+  hintContent: {
+    fontSize: 28, fontWeight: 'bold', color: '#fff',
+    textShadow: '0 0 16px rgba(255,255,255,0.7)',
+    textAlign: 'center', padding: '0 24px', lineHeight: 1.5,
+    maxWidth: '90%',
   },
 };
