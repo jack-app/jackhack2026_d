@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://github.com/jack-app/jackhack2026_d/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
