@@ -62,7 +62,8 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
           position: 'relative',
           display: 'flex', 
           alignItems: 'flex-end', 
-          width: '100%', height:"100%", 
+          width: '100%',
+          height:"100%", 
           border: `4cqw solid ${themeColor}`, 
           borderRadius: '10cqw', 
           boxSizing: 'border-box', 
@@ -76,10 +77,8 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
             backgroundColor: `${batteryLevelColor}`,
             opacity:"100%" , 
             borderRadius: '0 0 6cqw 6cqw', 
-            transition: 'height 0.3s ease, background-color 0.3s ease', 
-            zIndex: '-1'
-            
-            }}/>
+            transition: 'height 0.3s ease, background-color 0.3s ease',
+            }}></div>
         </div>
         <div className="recovery_effect_wrapper" style={{
           position:'absolute',
@@ -88,15 +87,40 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
           height:'100%',
           width:'100%',
           opacity: isRecovering ? 1 : 0,
-          transition:'opacity 0.3s'
+          transition:'opacity 0.3s ease-in-out'
         }} >
+        {/*<div className="recovery_effect_wrapper" style={{
+          position:'absolute',
+          top:'0',
+          left:'0',
+          height:'100%',
+          width:'100%',
+        }} >*/}
+          <div className='Lightning' style={{
+            position: 'absolute',
+            width: '50%',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)'
+          }}>
+            <svg 
+              viewBox="0 0 24 32"
+              fill="#fff"           /* 中身は白 */
+
+
+              strokeLinejoin="round"
+              style={{ paintOrder: 'stroke fill', filter: 'drop-shadow(0 0 5px #17ff1b)' }} /* 線を先に描画して、中身を上に乗せる（形を保つコツ） */
+            >
+              <path d="M15 2L5 18H13L11 30L21 12H13L15 2Z" />
+            </svg>
+          </div>
           <SingleRecoveryEffect translate={['380%', '-200%']}/>
           <SingleRecoveryEffect translate={['-150%', '-100%']}/>
           <SingleRecoveryEffect translate={['440%', '0%']}/>
           <SingleRecoveryEffect translate={['-240%', '300%']}/>
           <SingleRecoveryEffect translate={['390%', '500%']}/>
           <SingleRecoveryEffect translate={['-100%', '500%']}/>
-        </div> 
+        </div>
       </div>
       <p style={{ color: `${batteryLevelColor}`, fontFamily:"Noto Sans JP", fontWeight:"bold", fontSize:"1.6rem", userSelect:'none' }}>{battery}%</p>
     </div>
@@ -106,7 +130,7 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
 function SingleRecoveryEffect({ translate }) {
   return (
     <>
-      <p style={{color:'#17ff1b',
+      <p style={{color:'#90fe92',
         fontFamily:'Noto Sans JP',
         fontWeight:'bolder',
         fontSize:'1.6rem',
@@ -117,6 +141,7 @@ function SingleRecoveryEffect({ translate }) {
         verticalAlign:'center',
         userSelect:'none',
         transform:`translate(${translate[0]}, ${translate[1]})`,
+        filter: 'drop-shadow(0 0 5px #17ff1b)'
       }}>+</p>
     </>
   );
