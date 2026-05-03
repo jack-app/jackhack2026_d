@@ -45,7 +45,7 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
   const batteryLevelColor = battery <= 20  ? '#F44336' /*20以下*/ : battery <= 50 ? '#ffea00' /* 50以下 */ : '#17ff1b';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent:'center', gap: 8, containerType:"inline-size", width: '100%', height: '100%', backgroundColor:"#0E1A20" , zIndex:'-2'}}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent:'center', gap: 8, containerType:"inline-size", width: '100%', height: '100%', backgroundColor:"#0E1A20" }}>
       <p style={{ color:`${themeColor}`, fontFamily:"Noto Sans JP", fontWeight:"bold", fontSize:"1.3em", userSelect:'none' }}>Battery</p>
       <div className="whole_battery" style={{  position: 'relative', width: '36%', aspectRatio: "1/3" }}>
         <div className="battery_tip" style={{
