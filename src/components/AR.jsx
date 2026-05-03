@@ -175,12 +175,12 @@ function WideTrack() {
     <group position={[0, TRACK_Y, 0]}>
       <mesh position={[0, -0.68, midZ]}>
         <boxGeometry args={[15, 0.18, Math.abs(LEN)]} />
-        <meshStandardMaterial color="#4a5060" roughness={0.80} metalness={0.05} />
+        <meshStandardMaterial color="#0E1A20" roughness={0.80} metalness={0.05} />
       </mesh>
       {sleeperZs.map((z, i) => (
         <mesh key={i} position={[0, -0.50, z]}>
           <boxGeometry args={[13, 0.14, 0.32]} />
-          <meshStandardMaterial color="#5c3317" roughness={0.80} />
+          <meshStandardMaterial color="#1A3040" roughness={0.80} />
         </mesh>
       ))}
       <mesh position={[-RAIL_X, -0.42, midZ]}><boxGeometry args={[0.24, 0.05, Math.abs(LEN)]} /><meshStandardMaterial color="#6b7280" metalness={0.65} roughness={0.35} /></mesh>
@@ -197,24 +197,37 @@ function WideCart() {
   const W = CART_W, H = 1.35, D = 1.7, base = -0.30, Y = TRACK_Y;
   return (
     <group position={[0, Y, 0]}>
-      <mesh position={[-W / 2, base + H / 2, 0]}><boxGeometry args={[0.18, H, D]} /><meshStandardMaterial color="#b45309" metalness={0.25} roughness={0.70} /></mesh>
-      {[-0.55, 0, 0.55].map((z, i) => <mesh key={`l-${i}`} position={[-W / 2 - 0.03, base + H / 2, z]}><boxGeometry args={[0.08, H + 0.06, 0.12]} /><meshStandardMaterial color="#78350f" metalness={0.5} /></mesh>)}
-      <mesh position={[W / 2, base + H / 2, 0]}><boxGeometry args={[0.18, H, D]} /><meshStandardMaterial color="#b45309" metalness={0.25} roughness={0.70} /></mesh>
-      {[-0.55, 0, 0.55].map((z, i) => <mesh key={`r-${i}`} position={[W / 2 + 0.03, base + H / 2, z]}><boxGeometry args={[0.08, H + 0.06, 0.12]} /><meshStandardMaterial color="#78350f" metalness={0.5} /></mesh>)}
-      <mesh position={[0, base + H * 0.25, D / 2]}><boxGeometry args={[W + 0.14, H * 0.5, 0.12]} /><meshStandardMaterial color="#92400e" metalness={0.4} roughness={0.6} transparent opacity={0.18} /></mesh>
-      <mesh position={[0, base + H * 0.75, D / 2]}><boxGeometry args={[W + 0.14, H * 0.5, 0.12]} /><meshStandardMaterial color="#92400e" metalness={0.4} roughness={0.6} transparent opacity={0.10} /></mesh>
-      <mesh position={[0, base + H / 2, -D / 2]}><boxGeometry args={[W + 0.14, H, 0.12]} /><meshStandardMaterial color="#78350f" metalness={0.35} roughness={0.65} /></mesh>
-      <mesh position={[0, base, 0]}><boxGeometry args={[W, 0.1, D]} /><meshStandardMaterial color="#1a0e04" roughness={1} /></mesh>
-      {[-W / 2, W / 2].map((x, i) => <mesh key={i} position={[x, base + H + 0.045, 0]}><boxGeometry args={[0.22, 0.09, D + 0.16]} /><meshStandardMaterial color="#6b3508" metalness={0.6} roughness={0.4} /></mesh>)}
-      <mesh position={[0, base + H + 0.045, D / 2]}><boxGeometry args={[W + 0.26, 0.09, 0.16]} /><meshStandardMaterial color="#6b3508" metalness={0.6} roughness={0.4} transparent opacity={0.30} /></mesh>
-      <mesh position={[0, base + H + 0.045, -D / 2]}><boxGeometry args={[W + 0.26, 0.09, 0.16]} /><meshStandardMaterial color="#6b3508" metalness={0.6} roughness={0.4} /></mesh>
-      <mesh position={[0, base - 0.07, 0]}><boxGeometry args={[W + 0.22, 0.1, D + 0.18]} /><meshStandardMaterial color="#374151" metalness={0.7} roughness={0.4} /></mesh>
-      {[0.62, -0.62].map((z, i) => <mesh key={i} position={[0, base - 0.2, z]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.05, 0.05, W + 2.4, 8]} /><meshStandardMaterial color="#1f2937" metalness={0.85} /></mesh>)}
+      {/* 左右のメインパネル（#5DCAA5を少し落ち着かせた色） */}
+      <mesh position={[-W / 2, base + H / 2, 0]}><boxGeometry args={[0.18, H, D]} /><meshStandardMaterial color="#4A9C82" metalness={0.25} roughness={0.70} /></mesh>
+      {[-0.55, 0, 0.55].map((z, i) => <mesh key={`l-${i}`} position={[-W / 2 - 0.03, base + H / 2, z]}><boxGeometry args={[0.08, H + 0.06, 0.12]} /><meshStandardMaterial color="#1A3040" metalness={0.5} /></mesh>)}
+      
+      <mesh position={[W / 2, base + H / 2, 0]}><boxGeometry args={[0.18, H, D]} /><meshStandardMaterial color="#4A9C82" metalness={0.25} roughness={0.70} /></mesh>
+      {[-0.55, 0, 0.55].map((z, i) => <mesh key={`r-${i}`} position={[W / 2 + 0.03, base + H / 2, z]}><boxGeometry args={[0.08, H + 0.06, 0.12]} /><meshStandardMaterial color="#1A3040" metalness={0.5} /></mesh>)}
+      
+      {/* 前面のシールド（#5DCAA5の半透明） */}
+      <mesh position={[0, base + H * 0.25, D / 2]}><boxGeometry args={[W + 0.14, H * 0.5, 0.12]} /><meshStandardMaterial color="#5DCAA5" metalness={0.4} roughness={0.6} transparent opacity={0.18} /></mesh>
+      <mesh position={[0, base + H * 0.75, D / 2]}><boxGeometry args={[W + 0.14, H * 0.5, 0.12]} /><meshStandardMaterial color="#5DCAA5" metalness={0.4} roughness={0.6} transparent opacity={0.10} /></mesh>
+      
+      {/* 背面のパネル（深緑） */}
+      <mesh position={[0, base + H / 2, -D / 2]}><boxGeometry args={[W + 0.14, H, 0.12]} /><meshStandardMaterial color="#1A3040" metalness={0.35} roughness={0.65} /></mesh>
+      
+      {/* 床面（ダークブルー系） */}
+      <mesh position={[0, base, 0]}><boxGeometry args={[W, 0.1, D]} /><meshStandardMaterial color="#0f172a" roughness={1} /></mesh>
+      
+      {/* 上部のフチ（少し暗めのエメラルド） */}
+      {[-W / 2, W / 2].map((x, i) => <mesh key={i} position={[x, base + H + 0.045, 0]}><boxGeometry args={[0.22, 0.09, D + 0.16]} /><meshStandardMaterial color="#2B5A4B" metalness={0.6} roughness={0.4} /></mesh>)}
+      <mesh position={[0, base + H + 0.045, D / 2]}><boxGeometry args={[W + 0.26, 0.09, 0.16]} /><meshStandardMaterial color="#2B5A4B" metalness={0.6} roughness={0.4} transparent opacity={0.30} /></mesh>
+      <mesh position={[0, base + H + 0.045, -D / 2]}><boxGeometry args={[W + 0.26, 0.09, 0.16]} /><meshStandardMaterial color="#2B5A4B" metalness={0.6} roughness={0.4} /></mesh>
+      
+      {/* 下部のシャーシ・車輪（暗めのブルーグレー） */}
+      <mesh position={[0, base - 0.07, 0]}><boxGeometry args={[W + 0.22, 0.1, D + 0.18]} /><meshStandardMaterial color="#1e293b" metalness={0.7} roughness={0.4} /></mesh>
+      {[0.62, -0.62].map((z, i) => <mesh key={i} position={[0, base - 0.2, z]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.05, 0.05, W + 2.4, 8]} /><meshStandardMaterial color="#0f172a" metalness={0.85} /></mesh>)}
+      
       {[[-W / 2 - 0.8, base - 0.2, 0.62], [ W / 2 + 0.8, base - 0.2, 0.62], [-W / 2 - 0.8, base - 0.2, -0.62], [ W / 2 + 0.8, base - 0.2, -0.62]].map(([wx, wy, wz], i) => (
         <group key={i} position={[wx, wy, wz]}>
-          <mesh rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.25, 0.25, 0.13, 14]} /><meshStandardMaterial color="#374151" metalness={0.7} roughness={0.3} /></mesh>
-          <mesh rotation={[0, 0, Math.PI / 2]}><torusGeometry args={[0.23, 0.03, 6, 14]} /><meshStandardMaterial color="#111827" metalness={0.3} roughness={0.8} /></mesh>
-          <mesh rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.075, 0.075, 0.15, 8]} /><meshStandardMaterial color="#9ca3af" metalness={0.8} /></mesh>
+          <mesh rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.25, 0.25, 0.13, 14]} /><meshStandardMaterial color="#334155" metalness={0.7} roughness={0.3} /></mesh>
+          <mesh rotation={[0, 0, Math.PI / 2]}><torusGeometry args={[0.23, 0.03, 6, 14]} /><meshStandardMaterial color="#020617" metalness={0.3} roughness={0.8} /></mesh>
+          <mesh rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.075, 0.075, 0.15, 8]} /><meshStandardMaterial color="#94a3b8" metalness={0.8} /></mesh>
         </group>
       ))}
     </group>
@@ -275,8 +288,8 @@ function TrackSegment({ direction, segments = 250, yOffset = 0 }) {
 
     parts.push(
       <group key={`bed-${i}`}>
-        <DiagBox x1={cmx - nx*7.5} y={TRACK_Y-0.68 + yOffset} z1={cmz - nz*7.5} x2={cmx + nx*7.5} z2={cmz + nz*7.5} w={len * 1.05} h={0.18} color="#4a5060" roughness={0.85} metalness={0.05} />
-        <DiagBox x1={slx1} y={TRACK_Y-0.50 + yOffset} z1={slz1} x2={slx2} z2={slz2} w={0.32} h={0.14} color="#5c3317" roughness={0.92} />
+        <DiagBox x1={cmx - nx*7.5} y={TRACK_Y-0.68 + yOffset} z1={cmz - nz*7.5} x2={cmx + nx*7.5} z2={cmz + nz*7.5} w={len * 1.05} h={0.18} color="#0E1A20" roughness={0.85} metalness={0.05} />
+        <DiagBox x1={slx1} y={TRACK_Y-0.50 + yOffset} z1={slz1} x2={slx2} z2={slz2} w={0.32} h={0.14} color="#1A3040" roughness={0.92} />
       </group>
     );
   }
@@ -497,7 +510,7 @@ const buildPath = (def, interval) => {
 };
 
 function TimberFrames() {
-  const woodMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#3d1f0f", roughness: 0.95, metalness: 0.05 }), []);
+  const woodMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#1A3040", roughness: 0.95, metalness: 0.05 }), []);
   const H = 13.5;
   const interval = 4.5; // Xブレースの間隔
 
