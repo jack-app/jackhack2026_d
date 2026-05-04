@@ -17,7 +17,7 @@ export default function Finish({ status, battery, currentIndex, totalQuestions, 
       
       <div style={{
               position: 'absolute',
-              top: '0%',
+              top: '-10%',
               left: '7%',
               width: '18%',
               height: '100%',
@@ -31,11 +31,14 @@ export default function Finish({ status, battery, currentIndex, totalQuestions, 
       <button 
         onClick={handleRetry} 
         style={{ 
+          borderRadius: "20px",
           backgroundColor: isWon ? "#5DCAA5" : "#E23636",
           padding: "10px 20px", 
           fontSize: "40px", 
           cursor: "pointer", 
-          margin: "10px 20px"
+          margin: "20px 40px",
+          fontWeight: "bold",
+          fontsize: '40px'
         }}
       >
         もう一度プレイする
