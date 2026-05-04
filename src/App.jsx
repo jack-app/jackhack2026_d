@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useNavigate} from 'react-router
 import Start from './components/Start';
 import QuizPage from './components/QuizPage';
 import Finish from './components/Finish';
-import WhitchNarrator from './components/WhitchNarrator';
 import Selector from './components/Selector';
 
 const QUESTIONS = [
@@ -233,8 +232,8 @@ const handleBranchComplete = () => {
               battery={battery}
               currentIndex={currentIndex + 1}
               totalQuestions={QUESTIONS.length}
+              currentNarration={currentNarration}
             />
-            <WhitchNarrator lines={currentNarration} />
           </>
         } />
       </Routes>
