@@ -14,7 +14,7 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
       setIsRecovering(true);
       setTimeout(() => {
         setIsRecovering(false);
-      }, 400);
+      }, 1000);
     }
     // TODO: ここに回復時の演出などの追加機能を実装できます
   };
@@ -42,7 +42,7 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
 
   // TODO: バッテリーバーのスタイルを実装する
   const themeColor = '#5DCAA5';
-  const batteryLevelColor = battery <= 20  ? '#F44336' /*20以下*/ : battery <= 50 ? '#ffea00' /* 50以下 */ : '#17ff1b';
+  const batteryLevelColor = battery <= 30  ? '#F44336' /*20以下*/ : battery <= 50 ? '#ffea00' /* 50以下 */ : '#3df940';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent:'center', gap: 8, containerType:"inline-size", width: '100%', height: '100%', backgroundColor:"#0E1A20" }}>
@@ -77,7 +77,7 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
             backgroundColor: `${batteryLevelColor}`,
             opacity:"100%" , 
             borderRadius: '0 0 6cqw 6cqw', 
-            transition: 'height 0.3s ease, background-color 0.3s ease',
+            transition: 'height 0.5s ease, background-color 0.5s ease',
             }}></div>
         </div>
         <div className="recovery_effect_wrapper" style={{
@@ -87,7 +87,7 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
           height:'100%',
           width:'100%',
           opacity: isRecovering ? 1 : 0,
-          transition:'opacity 0.3s ease-in-out'
+          transition:'opacity 0.4s ease-in-out'
         }} >
         {/*<div className="recovery_effect_wrapper" style={{
           position:'absolute',
@@ -109,7 +109,7 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
 
 
               strokeLinejoin="round"
-              style={{ paintOrder: 'stroke fill', filter: 'drop-shadow(0 0 5px #17ff1b)' }} /* 線を先に描画して、中身を上に乗せる（形を保つコツ） */
+              style={{ paintOrder: 'stroke fill', filter: 'drop-shadow(0 0 5px #3df940)' }} /* 線を先に描画して、中身を上に乗せる（形を保つコツ） */
             >
               <path d="M15 2L5 18H13L11 30L21 12H13L15 2Z" />
             </svg>
@@ -130,7 +130,7 @@ const BatteryMeter = forwardRef(function BatteryMeter({ onBatteryChange }, ref) 
 function SingleRecoveryEffect({ translate }) {
   return (
     <>
-      <p style={{color:'#90fe92',
+      <p style={{color:'#96ff97',
         fontFamily:'Noto Sans JP',
         fontWeight:'bolder',
         fontSize:'1.6rem',
@@ -141,7 +141,7 @@ function SingleRecoveryEffect({ translate }) {
         verticalAlign:'center',
         userSelect:'none',
         transform:`translate(${translate[0]}, ${translate[1]})`,
-        filter: 'drop-shadow(0 0 5px #17ff1b)'
+        filter: 'drop-shadow(0 0 5px #3df940)'
       }}>+</p>
     </>
   );
