@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
-export default function Finish({ status, battery, currentIndex, totalQuestions, onRetry }) {
+import WhitchNarrator from './WhitchNarrator';
+
+export default function Finish({ status, battery, currentIndex, totalQuestions, onRetry, currentNarration }) {
   const navigate = useNavigate();
   const isWon = status === 'success';
   const handleRetry = () => {
@@ -8,18 +10,32 @@ export default function Finish({ status, battery, currentIndex, totalQuestions, 
   }
   
   return (
-    <div style={{ textAlign: "center", padding: "40px", backgroundColor: "red"}}>
-      <h2>{isWon ? "🎉 全問正解！おめでとうございます！" : "💥 ゲームオーバー"}</h2>
+    <div style={{ textAlign: "center", padding: "40px", backgroundColor: "#0E1A20", position: 'relative', height: "100vh",display: "flex",
+    justifyContent: "center", alignItems: "center",flexDirection:'column'}}>
+      <h2 style={{color: "#FFFFFF", fontSize: "96px", zIndex: 1, position: 'relative'}}>{isWon ? "ゲームクリア" : "ゲームオーバー"}</h2>
+      <p style={{color: isWon ? "#5DCAA5" : "#88877F", fontSize: "32px"}}>{isWon ? "トロッコは無事目的地に到着した" : "トロッコは爆発した"}</p>
       
-      <p>回答した問題数: {currentIndex} / {totalQuestions}</p>
-      <p>バッテリー残量: {battery}%</p>
+      <div style={{
+              position: 'absolute',
+              top: '0%',
+              left: '7%',
+              width: '18%',
+              height: '100%',
+              zIndex:0
+            }}>
+              <WhitchNarrator lines={currentNarration} />
+            </div>
+    
+      <p style={{color: isWon ? "#5DCAA5" : "#E23636", fontSize: "64px"}}>{isWon ? `バッテリー残量: ${battery}%` : `Q${currentIndex}で失敗`}</p>
       
       <button 
         onClick={handleRetry} 
         style={{ 
+          backgroundColor: isWon ? "#5DCAA5" : "#E23636",
           padding: "10px 20px", 
-          fontSize: "16px", 
-          cursor: "pointer" 
+          fontSize: "40px", 
+          cursor: "pointer", 
+          margin: "10px 20px"
         }}
       >
         もう一度プレイする
